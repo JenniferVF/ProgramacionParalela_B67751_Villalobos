@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1586146716 source:/home/jennifer/Documentos/C++/Semaforo/main.cpp
+	<iostream>
+	"Semaforo.h"
+
+1586147701 /home/jennifer/Documentos/C++/Semaforo/Semaforo.h
+
