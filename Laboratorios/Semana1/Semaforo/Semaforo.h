@@ -11,7 +11,7 @@ class Semaforo {
       ~Semaforo();
       int Signal(int id);	// Puede llamarse V
       int Wait(int id);	// Puede llamarse P
-      int getID(Semaforo*);  // Obtiene el identificador
+      int getID(Semaforo sem);  // Obtiene el identificador
    private:
       int id;		// Identificador del semaforo
 };

@@ -42,7 +42,7 @@ int Semaforo::Signal(int id)
     return aux;
 }
 
-int Semaforo::getID(Semaforo *sem)
+int Semaforo::getID(Semaforo sem)
 {
-   return sem->id;
+   return sem.id;
 }
