@@ -5,15 +5,19 @@
 
 1586147701 /home/jennifer/Documentos/C++/Semaforo/Semaforo.h
 
-1586146716 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/main.cpp
+1587058989 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/main.cpp
 	<iostream>
+	<stdio.h>
+	<unistd.h>
 	"Semaforo.h"
 
-1587001864 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/Semaforo.h
+1587058989 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/Semaforo.h
 
-1587001864 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/Semaforo.cpp
-	"Semaforo.h"
+1587058512 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana1/Semaforo/Semaforo.cpp
 	<sys/types.h>
 	<sys/ipc.h>
 	<sys/sem.h>
+	<stdio.h>
+	<stdlib.h>
+	"Semaforo.h"
 

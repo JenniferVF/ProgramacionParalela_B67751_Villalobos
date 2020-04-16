@@ -9,9 +9,9 @@ class Semaforo {
    public:
       Semaforo( int ValorInicial = 0 );
       ~Semaforo();
-      int Signal(int id);	// Puede llamarse V
-      int Wait(int id);	// Puede llamarse P
-      int getID(Semaforo sem);  // Obtiene el identificador
+      int Signal();	// Puede llamarse V
+      int Wait();	// Puede llamarse P
+
    private:
       int id;		// Identificador del semaforo
 };
