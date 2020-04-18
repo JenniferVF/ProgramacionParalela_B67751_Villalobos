@@ -27,7 +27,8 @@ double calcularSumaParcialPi( double Pi[], int proceso, long inicial, long termi
       casiPi += alterna/divisor;		// 4 / (2xi + 1)
       alterna *= -1;				// Pasa de 4 a -4 y viceversa, para realizar la aproximacion de los terminos
    }
-   Pi[ proceso ] = casiPi;			// Guarda el resultado en el vector y finaliza
+   //Pi[ proceso ] = casiPi;			// Guarda el resultado en el vector y finaliza
+   return casiPi;
    exit( 0 );
 }
 
@@ -36,6 +37,7 @@ int main( int argc, char ** argv ) {
    long terminos, inicio, fin;
    int proceso;
    int pid;
+   double resultado; //Guarda el resultado del calculo de un proceso
    double casiPi[ 10 ] = { 0 };
 
    terminos = 1000000;
@@ -48,7 +50,8 @@ int main( int argc, char ** argv ) {
       fin = (proceso + 1) * terminos/10;
       pid = fork();
       if ( ! pid ) {
-         calcularSumaParcialPi( casiPi, proceso, inicio, fin );
+         resultado = calcularSumaParcialPi( casiPi, proceso, inicio, fin );
+         casiPi[proceso] = resultado;
       } else {
          printf("Creating process %d: starting value %ld, finish at %ld\n", pid, inicio, fin );
       }
