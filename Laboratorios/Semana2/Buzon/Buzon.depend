@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1587697916 source:/home/jennifer/Documentos/C++/Buzon/main.cpp
+
+1587755271 source:/home/jennifer/Documentos/C++/Buzon/Buzon.cpp
+	"Buzon.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/types.h>
+	<sys/ipc.h>
+	<sys/msg.h>
+
+1587752524 /home/jennifer/Documentos/C++/Buzon/Buzon.h
+
+1587741886 source:/home/jennifer/Documentos/C++/Buzon/EnviarSinClases.cpp
+
+1587741886 source:/home/jennifer/Documentos/C++/Buzon/RecibirSinClases.cpp
+
+1587741992 source:/home/jennifer/Documentos/C++/Buzon/EnviarConClases.cpp
+
+1587752325 source:/home/jennifer/Documentos/C++/Buzon/RecibirConClases.cpp
+	<stdio.h>
+	<string.h>
+	"Buzon.h"
+
