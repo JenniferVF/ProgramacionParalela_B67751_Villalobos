@@ -1,0 +1,23 @@
+# depslib dependency file v1.0
+1587789673 source:/home/jennifer/Documentos/C++/PiPorSeries/PiMemoria/PiMemoria.cpp
+	<stdlib.h>
+	<stdio.h>
+	<sys/types.h>
+	<unistd.h>
+	<sys/wait.h>
+	<sstream>
+	<string.h>
+	<iostream>
+	"Semaforo.h"
+	<sys/shm.h>
+
+1587775160 source:/home/jennifer/Documentos/C++/PiPorSeries/PiMemoria/Semaforo.cpp
+	<sys/types.h>
+	<sys/ipc.h>
+	<sys/sem.h>
+	<stdio.h>
+	<stdlib.h>
+	"Semaforo.h"
+
+1587775161 /home/jennifer/Documentos/C++/PiPorSeries/PiMemoria/Semaforo.h
+
