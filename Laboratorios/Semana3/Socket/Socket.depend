@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1588266267 source:/home/jennifer/Documentos/C++/Socket/main.cpp
+	<iostream>
+
+1588311533 source:/home/jennifer/Documentos/C++/Socket/Socket.cpp
+	<sys/types.h>
+	<sys/socket.h>
+	<arpa/inet.h>
+	<unistd.h>
+	<stdlib.h>
+	<stdio.h>
+	"Socket.h"
+
+1588309983 /home/jennifer/Documentos/C++/Socket/Socket.h
+
+1588291614 source:/home/jennifer/Documentos/C++/Socket/ipv4-test.cpp
+	<stdio.h>
+	"Socket.h"
+
