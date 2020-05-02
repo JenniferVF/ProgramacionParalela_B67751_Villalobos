@@ -30,9 +30,16 @@
 
 1588317458 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/Socket.h
 
-1588384027 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv4-test.cpp
-	<stdio.h>
-	"Socket.h"
+1588395585 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv4-test.cpp
 
-1588384027 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv6-test.cpp
+1588389065 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv6-test.cpp
+
+1588395585 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/Server.cpp
+	<arpa/inet.h>
+	<stdio.h>
+	<stdlib.h>
+	<sys/socket.h>
+	<sys/types.h>
+	<unistd.h>
+	<netinet/in.h>
 

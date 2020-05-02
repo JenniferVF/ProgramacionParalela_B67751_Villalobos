@@ -102,7 +102,7 @@ int Socket::Connect( char *host, char *service )
 
     //Criterios de la direccion del socket
     hints.ai_family = AF_UNSPEC;  //Permite IPv4 o IPv6.
-    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
     hints.ai_protocol = 0; //Cualquier protocolo
 
@@ -112,7 +112,7 @@ int Socket::Connect( char *host, char *service )
     for(rp = resultado; rp; rp = rp->ai_next)
     {
         conexion = connect(idSocket, rp->ai_addr, rp->ai_addrlen);
-        if(conexion == 0)
+        if(conexion == -1)
         {
             break;
         }
