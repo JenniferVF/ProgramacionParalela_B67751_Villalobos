@@ -6,8 +6,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "Socket.h"
 
 /*
@@ -74,9 +76,10 @@ void Socket::Close()
  */
 int Socket::Connect( char * hostip, int port )
 {
+    //Para definir los elementos del socket
     struct sockaddr_in direccion;
     direccion.sin_family = AF_INET;
-    direccion.sin_port = htons(port);
+    direccion.sin_port = htons(port); //Se convierte a variable de red
 
     inet_pton(AF_INET, hostip, & direccion.sin_addr);
 
@@ -90,12 +93,36 @@ int Socket::Connect( char * hostip, int port )
    char * hostip: direccion del servidor, por ejemplo "www.ecci.ucr.ac.cr"
    char * service: nombre del servicio que queremos acceder, por ejemplo "http"
  */
-//int Socket::Connect( char *host, char *service )
-//{
-//    int conexion = connect(idSocket, (sockaddr *) host, sizeof(host));
-//    //return -1;
-//
-//}
+int Socket::Connect( char *host, char *service )
+{
+    int conexion;
+    struct addrinfo hints, *resultado, *rp;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+
+    //Criterios de la direccion del socket
+    hints.ai_family = AF_UNSPEC;  //Permite IPv4 o IPv6.
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0; //Cualquier protocolo
+
+    //Resultado guarda la direccion a internet
+    conexion = getaddrinfo(host, service, &hints, &resultado);
+
+    for(rp = resultado; rp; rp = rp->ai_next)
+    {
+        conexion = connect(idSocket, rp->ai_addr, rp->ai_addrlen);
+        if(conexion == 0)
+        {
+            break;
+        }
+
+    }
+
+    //Se libera la direccion guardada
+    freeaddrinfo(resultado);
+    return conexion;
+}
 
 
 int Socket::Read( char *text, int len )

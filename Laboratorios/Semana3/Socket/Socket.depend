@@ -17,3 +17,22 @@
 	<stdio.h>
 	"Socket.h"
 
+1588384000 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/Socket.cpp
+	<sys/types.h>
+	<sys/socket.h>
+	<arpa/inet.h>
+	<unistd.h>
+	<netdb.h>
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"Socket.h"
+
+1588317458 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/Socket.h
+
+1588384027 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv4-test.cpp
+	<stdio.h>
+	"Socket.h"
+
+1588384027 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana3/Socket/ipv6-test.cpp
+

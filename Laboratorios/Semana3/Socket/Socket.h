@@ -20,7 +20,7 @@ class Socket{
         void Close();
         int Read( char *, int );
         int Write( char *, int );
-        //int Write( char * );
+        int Write( char * );
         int Listen( int );
         int Bind( int );
         Socket * Accept();

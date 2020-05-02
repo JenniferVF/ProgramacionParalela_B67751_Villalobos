@@ -35,6 +35,7 @@
 		<Unit filename="Socket.cpp" />
 		<Unit filename="Socket.h" />
 		<Unit filename="ipv4-test.cpp" />
+		<Unit filename="ipv6-test.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
