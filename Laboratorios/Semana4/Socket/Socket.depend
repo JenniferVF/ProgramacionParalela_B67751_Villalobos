@@ -1,17 +1,24 @@
 # depslib dependency file v1.0
-1588906327 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/Socket.cpp
+1588993918 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/Socket.cpp
 	<sys/types.h>
 	<sys/socket.h>
 	<arpa/inet.h>
 	<unistd.h>
 	<netdb.h>
+	<netinet/in.h>
 	<stdlib.h>
 	<stdio.h>
 	<string.h>
 	"Socket.h"
 
-1588904171 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/Socket.h
+1588990748 /home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/Socket.h
 
 1588903894 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/main.cpp
 	<iostream>
+
+1588992352 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/MirrorClientTest.cpp
+	<stdio.h>
+	"Socket.h"
+
+1588993929 source:/home/jennifer/Escritorio/ProgramacionParalela_B67751_Villalobos/Laboratorios/Semana4/Socket/MirrorServerTest.cpp
 

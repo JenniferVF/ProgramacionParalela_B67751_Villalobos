@@ -14,6 +14,7 @@ class Socket{
     public:
         Socket( char, bool = false );
         Socket( int );
+        Socket();
         ~Socket();
         int Connect( char *, int );
         int Connect( char *, char * );

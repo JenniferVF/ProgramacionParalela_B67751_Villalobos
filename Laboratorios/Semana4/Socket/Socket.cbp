@@ -32,9 +32,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="MirrorClientTest.cpp" />
+		<Unit filename="MirrorServerTest.cpp" />
 		<Unit filename="Socket.cpp" />
 		<Unit filename="Socket.h" />
-		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

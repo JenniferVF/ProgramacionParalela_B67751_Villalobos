@@ -7,10 +7,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "Socket.h"
+
 
 /*
    char tipo: el tipo de socket que quiere definir
@@ -51,10 +53,40 @@ Socket::Socket( char tipo, bool ipv6 )
     }
 }
 
-Socket::Socket( int entero )
+/*
+Se encarga de crear un nuevo socket segun el nuevo
+id enviado por el metodo bind.
+*/
+Socket::Socket( int newId )
 {
+    // Crea un socket de IPv4, tipo "stream"
+    this->idSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (idSocket == -1)
+    {
+        perror("Socket::Socket");
+        exit(1);
+    }
+
+    //Se establece la nuevo id
+    SetIDSocket(newId);
+}
+
+
+// Crea un socket de IPv4, tipo "stream"
+Socket::Socket()
+{
+    this->idSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (idSocket == -1)
+    {
+        perror("Socket::Socket");
+        exit(1);
+    }
 
 }
+
+
 Socket::~Socket()
 {
     Close();
@@ -84,9 +116,15 @@ int Socket::Connect( char * hostip, int port )
     direccion.sin_family = AF_INET;
     direccion.sin_port = htons(port); //Se convierte a variable de red
 
-    inet_pton(AF_INET, hostip, & direccion.sin_addr);
+    inet_aton(hostip, &direccion.sin_addr);
 
-    int conexion = connect(this->idSocket, (struct sockaddr *) & direccion, sizeof(direccion));
+    int conexion = connect(this->idSocket, (struct sockaddr *) &direccion, sizeof(direccion));
+
+     if(conexion == -1)
+        {
+            perror("Socket::Connect");
+            exit(1);
+        }
     return conexion;
 
 }
@@ -117,7 +155,8 @@ int Socket::Connect( char *host, char *service )
         conexion = connect(idSocket, rp->ai_addr, rp->ai_addrlen);
         if(conexion == -1)
         {
-            break;
+            perror("Socket::Connect");
+            exit(1);
         }
 
     }
@@ -153,6 +192,18 @@ int Socket::Write( char *text, int len)
 }
 
 
+int Socket::Write( char *text)
+{
+    int escritura = write(this->idSocket, (void *)text, strlen(text));
+    if (escritura == -1)
+    {
+        perror("Socket::Write");
+        exit(1);
+    }
+    return escritura;
+}
+
+
 int Socket::Listen( int queue )
 {
     int spasivo = listen(this->idSocket, queue);
@@ -168,12 +219,14 @@ int Socket::Listen( int queue )
 
 int Socket::Bind( int port )
 {
-    struct sockaddr_in6 server_addr;
-    server_addr.sin6_family = AF_INET6;
-    server_addr.sin6_addr = in6addr_any;
-    server_addr.sin6_port = htons(port);
+    //Se detallan las cualidades del socket
+    struct sockaddr_in direccion;
+    direccion.sin_family = AF_INET;
+    direccion.sin_addr.s_addr = htonl(INADDR_ANY);
+    direccion.sin_port = htons(port);
 
-    int identificacion = bind(this->idSocket, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    //Se genera la conexion
+    int identificacion = bind(this->idSocket, (const sockaddr*)&direccion, sizeof(direccion));
     if(identificacion == -1)
     {
         perror("Socket::Bind");
@@ -185,20 +238,40 @@ int Socket::Bind( int port )
 
 Socket * Socket::Accept()
 {
+    struct sockaddr_in direccion;
+    socklen_t direccion_len = sizeof(direccion);
 
-    //return -1;
+    //Se crea una nueva direccion
+    int newId = accept(this->idSocket, (struct sockaddr*) &direccion, &direccion_len);
+
+    if(newId == -1)
+    {
+        perror("Socket::Accept");
+        exit(1);
+    }
+
+    //Se crea un nuevo Socket con la direccion obtenida
+    Socket * newSocket = new Socket(newId);
+
+    return newSocket;
 
 }
 
 
 int Socket::Shutdown( int mode )
 {
+    int apagado = shutdown(this->idSocket, mode);
 
-    //return -1;
+     if(apagado == -1)
+    {
+        perror("Socket::Shutdown");
+        exit(1);
+    }
+    return apagado;
 
 }
 
-
+//Para declarar la nueva id del socket
 void Socket::SetIDSocket(int id)
 {
 
