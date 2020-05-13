@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <bits/stdc++.h>
+#include <math.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -10,6 +12,8 @@
 using namespace std;
 
 int Collatz(int);
+bool Potencia(int);
+int Procesos(int);
 
 int  main(int  argc, char *argv[])
 {
@@ -17,13 +21,13 @@ int  main(int  argc, char *argv[])
     int cant_pasos; //Cantidad e pasos en que se realizo la conjetura de Collatz.
     int master_id; //El id del proceso padre
     int son_id; //El id del (de los) proceso(s) hijo(s)
-    int cant_procs = 5; //Cantidad de procesos por crear
+    int cant_procs; //Cantidad de procesos por crear
     int rango; //El rango que le corresponde a cada proceso hijo
-        int start; //Inicio del rango
+    int start; //Inicio del rango
     int top; //Fin del rango
 
-    int    ShmID;
-    int    *ShmPTR;
+    int    memory_id;
+    int    *shared_ptr;
     pid_t  pid;
     int    status;
 
@@ -34,18 +38,24 @@ int  main(int  argc, char *argv[])
         exit(1);
     }
 
-    //if(atoi(argv[1]) ){}
+    //Si el numero ingresado no es potencia de 10.
+    if(!Potencia(atoi(argv[1])))
+    {
+        printf("El numero ingresado debe ser potencia de 10.\nIngrese: %s <cantidad limite> (que sea potencia de 10)\n", argv[0]);
+        exit(1);
+    }
 
     //Se define el rango: 2, limite.
     limite = atoi(argv[1]);
+    cant_procs = Procesos(limite);
     rango = limite/cant_procs;
     //Se establece en cero los elementos de la memoria compartida
-    ShmPTR[0] = 0;
-    ShmPTR[1] = 0;
+    shared_ptr[0] = 0;
+    shared_ptr[1] = 0;
 
     //Se crea el segmento de memoria compartida
-    ShmID = shmget(IPC_PRIVATE, 2*sizeof(int), IPC_CREAT | 0666);
-    if (ShmID < 0)
+    memory_id = shmget(IPC_PRIVATE, 2*sizeof(int), IPC_CREAT | 0666);
+    if (memory_id < 0)
     {
         perror("Error: shmget\n");
         exit(1);
@@ -73,8 +83,8 @@ int  main(int  argc, char *argv[])
     }
 
     //Cada hijo se une a la memoria compartida
-    ShmPTR = (int *) shmat(ShmID, NULL, 0);
-    if ((intptr_t) ShmPTR == -1)
+    shared_ptr = (int *) shmat(memory_id, NULL, 0);
+    if ((intptr_t) shared_ptr == -1)
     {
         perror("Error: shmat\n");
         exit(1);
@@ -101,10 +111,10 @@ int  main(int  argc, char *argv[])
             for(int i = 2; i <= top; i++)
             {
                 cant_pasos = Collatz(i);
-                if(cant_pasos > ShmPTR[1])
+                if(cant_pasos > shared_ptr[1])
                 {
-                    ShmPTR[0] = i;
-                    ShmPTR[1] = cant_pasos;
+                    shared_ptr[0] = i;
+                    shared_ptr[1] = cant_pasos;
                 }
             }
         }
@@ -115,24 +125,21 @@ int  main(int  argc, char *argv[])
             for(int i = start; i <= top; i++)
             {
                 cant_pasos = Collatz(i);
-                if(cant_pasos > ShmPTR[1])
+                if(cant_pasos > shared_ptr[1])
                 {
-                    ShmPTR[0] = i;
-                    ShmPTR[1] = cant_pasos;
+                    shared_ptr[0] = i;
+                    shared_ptr[1] = cant_pasos;
                 }
             }
         }
     }
 
     //Cada hijo se separa de la memoria compartida.
-    if(shmdt((void *) ShmPTR) == -1)
+    if(shmdt((void *) shared_ptr) == -1)
     {
         perror("Error: shmdt\n");
     }
-//    else
-//    {
-//        printf("Process %d detached the segment\n", getpid());
-//    }
+
 
     //Todos los procesos hijo terminan. El padre espera.
     if(getpid() == master_id)
@@ -148,13 +155,13 @@ int  main(int  argc, char *argv[])
     }
 
     //Se anexa el puntero al proceso master.
-    ShmPTR = (int*) shmat(ShmID, NULL, 0);
+    shared_ptr = (int*) shmat(memory_id, NULL, 0);
     //Se muestra el resultado
     printf("Limite superior indicado: %d \nElemento del conjunto con mas pasos: %d \nPasos realizados: %d \n\n",
-           limite, ShmPTR[0], ShmPTR[1]);
+           limite, shared_ptr[0], shared_ptr[1]);
 
     //El proceso master elimina la memoria compartida.
-    shmctl(ShmID, IPC_RMID, NULL);
+    shmctl(memory_id, IPC_RMID, NULL);
     printf("Server exits...\n");
     exit(0);
 }
@@ -186,4 +193,63 @@ int Collatz(int rango)
     //Retorna la cantidad de pasos llevados a cabo para
     //llegar al numero 1.
     return cant_pasos;
+}
+
+/*
+*Metodo encargado de calcular los hijos/procesos
+*necesarios, segun el limite superior ingresado
+*por el usuario.
+*/
+int Procesos(int limite)
+{
+    int cant_procs;
+    int potencia;
+
+//Se obtiene la potencia de 10 correspondiente
+//del numero ingresado.
+    potencia = log10(limite);
+
+    //Si el numero es 10, 100 o 1000: 2 hijos.
+    if(potencia <= 3)
+    {
+        cant_procs = 2;
+    }
+    //Si el numero va desde 10000 a un millon: 5 hijos.
+    else if(potencia > 3 && potencia < 7)
+    {
+        cant_procs = 5;
+    }
+    //Si el numero es 10 millones o 100 millones: 10 hijos.
+    else if(potencia > 7 && potencia < 9)
+    {
+        cant_procs = 10;
+    }
+    //Si el numero es mayor: 20 hijos.
+    else
+    {
+        cant_procs = 20;
+    }
+
+    return cant_procs;
+}
+
+
+/*
+*Metodo que revisa si el numero ingresado es una potencia de 10.
+*/
+bool Potencia(int numero)
+{
+    int potencia = log10(numero);
+
+    //Si el resultado elevado a la potencia
+    //es igual al numero entrante, este es
+    //potencia de 10.
+    if(pow(10, potencia) == numero)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
