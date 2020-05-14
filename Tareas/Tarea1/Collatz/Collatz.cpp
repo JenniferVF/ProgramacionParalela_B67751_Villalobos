@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <bits/stdc++.h>
 #include <math.h>
+#include <ctime>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -23,13 +24,17 @@ int  main(int  argc, char *argv[])
     int son_id; //El id del (de los) proceso(s) hijo(s)
     int cant_procs; //Cantidad de procesos por crear
     int rango; //El rango que le corresponde a cada proceso hijo
-    int start; //Inicio del rango
+    int bottom; //Inicio del rango
     int top; //Fin del rango
+    clock_t start, finish; //Variables para medir el tiempo.
+    double time = 0; //Resultado del tiempo transcurrido
 
     int    memory_id;
-    int    *shared_ptr;
+    int    *shared_ptr = {};
     pid_t  pid;
     int    status;
+
+    start = clock();
 
     //Se le pide al usuario que ingrese un numero.
     if (argc != 2)
@@ -50,8 +55,9 @@ int  main(int  argc, char *argv[])
     cant_procs = Procesos(limite);
     rango = limite/cant_procs;
     //Se establece en cero los elementos de la memoria compartida
-    shared_ptr[0] = 0;
-    shared_ptr[1] = 0;
+    //shared_ptr[0] = 0;
+    //shared_ptr[1] = 0;
+
 
     //Se crea el segmento de memoria compartida
     memory_id = shmget(IPC_PRIVATE, 2*sizeof(int), IPC_CREAT | 0666);
@@ -100,7 +106,7 @@ int  main(int  argc, char *argv[])
         //Se define el inicio y el final del rango
         //en el que se va a realizar el calculo.
         //Esto segun el id del proceso.
-        start = (rango * son_id) + 1;
+        bottom = (rango * son_id) + 1;
         top = rango * (son_id+1);
 
         //Si es el proceso 0, el inicio debe tomarse
@@ -122,7 +128,7 @@ int  main(int  argc, char *argv[])
         else
         {
 
-            for(int i = start; i <= top; i++)
+            for(int i = bottom; i <= top; i++)
             {
                 cant_pasos = Collatz(i);
                 if(cant_pasos > shared_ptr[1])
@@ -133,6 +139,7 @@ int  main(int  argc, char *argv[])
             }
         }
     }
+
 
     //Cada hijo se separa de la memoria compartida.
     if(shmdt((void *) shared_ptr) == -1)
@@ -162,7 +169,13 @@ int  main(int  argc, char *argv[])
 
     //El proceso master elimina la memoria compartida.
     shmctl(memory_id, IPC_RMID, NULL);
-    printf("Server exits...\n");
+
+    //Se calcula el tiempo de ejecucion
+    finish = clock();
+    time = finish-start;
+    time = double(time/CLOCKS_PER_SEC);
+
+    printf("Server exits...\nTiempo transcurrido: %f\n", time);
     exit(0);
 }
 
