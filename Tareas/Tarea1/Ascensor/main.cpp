@@ -46,17 +46,15 @@ void * hiloAscensor( void * param )
     free( rotulo );
     mutex->Unlock();
 
-
-    //while(ascensor->getCapacidad() == 0)
-    //{
-        rotulo = (char *) calloc( 64, 1 );
+    while(!cola.empty())
+    {
         mutex->Lock();
-        ascensor->solicitud(cola.front(), rotulo);
+        rotulo = (char *) calloc( 64, 1 );
+        ascensor->solicitud(cola.back(), rotulo);
         cola.pop_back();
         printf( "%s", rotulo );
-        free( rotulo );
         mutex->Unlock();
-    //}
+    }
 
     return NULL;
 
@@ -180,6 +178,6 @@ int main( int argc, char ** argv )
     //Personas( 10 );	// Segunda oleada
 
 
-    pthread_join( ascensor, NULL );
+    //pthread_join( ascensor, NULL );
 
 }

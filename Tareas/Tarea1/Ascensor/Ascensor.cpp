@@ -104,7 +104,7 @@ std::vector<int> Ascensor::recorridoInside()
         piso = actual[2];
 
         //Si el ascensor va para arriba
-        if(this->direccion == true)
+        if(this->direccion)
         {
             if(piso >= this->pisoActual)
             {
@@ -141,7 +141,7 @@ std::vector<int> Ascensor::recorridoCola()
         piso = actual[1];
 
         //Si el ascensor va para arriba
-        if(this->direccion == true)
+        if(this->direccion)
         {
             if(piso > this->pisoActual)
             {
@@ -169,6 +169,7 @@ void Ascensor::upOrDown(char * rotulo)
 {
     std::vector<int> baja;
     std::vector<int> sube;
+    //std::vector<int>::iterator it;
 
     Orden(); //Se ordenan los vectores de menor a mayor
     baja = recorridoInside();
@@ -180,7 +181,7 @@ void Ascensor::upOrDown(char * rotulo)
         sprintf( rotulo, "Ascensor[ %d ]: Piso actual %d. --Bajan--\n", this->idAscensor, this->pisoActual );
         sprintf( rotulo, "Persona[ %d ]: Bajando en piso %d.\n", baja[0], baja[2] );
         //Se elimina esa persona del vector inside
-        inside.erase(std::find(inside.begin(), inside.end(), baja[0]));
+        inside.erase(std::find(inside.begin(), inside.end(), baja));
         //Se disminuye la capacidad
         this->capacidad--;
         //Se pasa alguien de la cola de espera a inside
@@ -190,7 +191,7 @@ void Ascensor::upOrDown(char * rotulo)
     else
     {
         //Si el ascensor va para arriba
-        if(this->direccion == true)
+        if(this->direccion)
         {
             if(baja[2] > sube[1])
             {
