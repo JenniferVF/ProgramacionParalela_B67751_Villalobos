@@ -1,0 +1,37 @@
+# depslib dependency file v1.0
+1589524427 source:/home/jennifer/Documentos/C++/Ascensor/main.cpp
+	<stdlib.h>
+	<stdio.h>
+	<unistd.h>
+	<time.h>
+	<pthread.h>
+	"Ascensor.h"
+	"Persona.h"
+	"Mutex.h"
+
+1589523916 source:/home/jennifer/Documentos/C++/Ascensor/Ascensor.cpp
+	<stdio.h>
+	<vector>
+	<iostream>
+	"Ascensor.h"
+
+1589532251 /home/jennifer/Documentos/C++/Ascensor/Ascensor.h
+	<vector>
+
+1589528424 source:/home/jennifer/Documentos/C++/Ascensor/Persona.cpp
+	<stdlib.h>
+	<stdio.h>
+	<time.h>
+	"Persona.h"
+
+1589505065 /home/jennifer/Documentos/C++/Ascensor/Persona.h
+	<vector>
+
+1589515151 source:/home/jennifer/Documentos/C++/Ascensor/Mutex.cpp
+	<stdlib.h>
+	<pthread.h>
+	"Mutex.h"
+
+1589515100 /home/jennifer/Documentos/C++/Ascensor/Mutex.h
+	<pthread.h>
+
