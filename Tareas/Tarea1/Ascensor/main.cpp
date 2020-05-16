@@ -22,6 +22,8 @@
 // Shared variables
 Mutex * mutex;
 std::vector<std::vector<int>> cola;
+std::vector<std::vector<int>> suben;
+std::vector<std::vector<int>> bajan;
 
 /*
  *  Rutina que ejecutan los hilos ascensor
@@ -37,34 +39,73 @@ void * hiloAscensor( void * param )
 
     identificacion = (long) param;
     rotulo = (char *) calloc( 64, 1 );
-    std::vector<int> id;
+    int entra = 0;
+    int upOrDown = 0;
 
     ascensor = new Ascensor( identificacion );
 
-    mutex->Lock();
-    ascensor->Display( rotulo );
-    printf( "%s", rotulo );
-    free( rotulo );
-    mutex->Unlock();
+//    mutex->Lock();
+//    ascensor->Display( rotulo );
+//    printf( "%s", rotulo );
+//    free( rotulo );
+//    mutex->Unlock();
 
     while(!cola.empty())
     {
         mutex->Lock();
         rotulo = (char *) calloc( 64, 1 );
-        id = ascensor->solicitud(cola, rotulo);
-        printf( "%s", rotulo );
-        ascensor->msgSube(id, rotulo);
+        entra = ascensor->solicitud(cola, rotulo);
         printf( "%s", rotulo );
 
-        id = ascensor->upOrDown(cola, rotulo);
+        if(entra == 0)
+        {
+            suben.push_back(cola.back());
+            cola.pop_back();
+        }
+
+        ascensor->Display( rotulo );
         printf( "%s", rotulo );
-        ascensor->msgBaja(id, rotulo);
+        upOrDown = ascensor->recorrido(suben, bajan, rotulo);
         printf( "%s", rotulo );
-        cola.pop_back();
+
+        if(upOrDown == 2)
+        {
+            for(int i=0; i < 3; i++)
+            {
+                entra = ascensor->solicitud(cola, rotulo);
+                printf( "%s", rotulo );
+
+                if(entra == 0)
+                {
+                    suben.push_back(cola.back());
+                    cola.pop_back();
+                }
+            }
+        }
+
+        //Esta mas cercano subir a alguien
+        else if(upOrDown == 1)
+        {
+            ascensor->msgSube(suben.back(), rotulo);
+            printf( "%s", rotulo );
+            bajan.push_back(suben.back());
+            suben.pop_back();
+        }
+        //Esta mas cercano bajar a alguien
+        else
+        {
+            ascensor->msgBaja(bajan.back(), rotulo);
+            printf( "%s", rotulo );
+            bajan.pop_back();
+        }
 
         mutex->Unlock();
     }
 
+    if(cola.empty())
+    {
+        printf("Ascensor[%d]: Todas las personas han sido atendidas.\n", identificacion);
+    }
     return NULL;
 
 }
@@ -107,13 +148,14 @@ void * hiloPersona( void * param)
     identificacion = (long) param;
     persona = new Persona( identificacion );
     rotulo = (char *) calloc( 64, 1 );
+
     mutex->Lock();
     persona->Display( rotulo );
     printf( "%s", rotulo );
-    free( rotulo );
+    //free( rotulo );
     mutex->Unlock();
 
-    rotulo = (char *) calloc( 64, 1 );
+    //rotulo = (char *) calloc( 64, 1 );
     mutex->Lock();
     cola.push_back(persona->llamado( rotulo ));
     printf( "%s", rotulo );
