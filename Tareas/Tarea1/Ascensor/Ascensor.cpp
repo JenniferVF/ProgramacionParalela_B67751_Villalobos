@@ -55,40 +55,44 @@ int Ascensor::isFull()
     }
 }
 
-void Ascensor::solicitud(std::vector<int> person_id, char* rotulo)
+std::vector<int> Ascensor::solicitud(std::vector<std::vector<int>> cola, char* rotulo)
 {
+    std::vector<int> person_id = cola.back();
     int lleno;
+
     lleno = this->isFull();
 
     if(lleno == -1 || lleno == 0)
     {
-        inside.push_back(person_id);
+        //inside.push_back(person_id);
         this->capacidad++;
         sprintf( rotulo, "Persona[ %d ]: --Solicitud plantada--\n", person_id[0] );
     }
     else
     {
-        cola.push_back(person_id);
+        //cola.push_back(person_id);
         sprintf( rotulo, "Ascensor[ %d ]: Capacidad superada. Persona [%d] debe esperar a que alguien se baje.\n", this->idAscensor, person_id[0] );
     }
 
+    return person_id;
 }
 
 void Ascensor::Orden()
 {
     //Se ordena el vector de las personas que van dentro del ascensor, segun el piso en el que bajan.
-    std::sort(inside.begin(), inside.end(), [](const std::vector<int>& a, const std::vector<int>&b)
+    std::sort(this->inside.begin(), this->inside.end(), [](const std::vector<int> & a, const std::vector<int> & b)
     {
         return a[2] < b[2];
     });
 
     //Se ordena el vector de las personas que aun no han subido, segun el piso en el que suben.
-    std::sort(cola.begin(), cola.end(), [](const std::vector<int>& a, const std::vector<int>&b)
+    std::sort(this->cola.begin(), this->cola.end(), [](const std::vector<int> & a, const std::vector<int> & b)
     {
         return a[1] < b[1];
     });
 
 }
+
 
 std::vector<int> Ascensor::recorridoInside()
 {
@@ -165,61 +169,84 @@ std::vector<int> Ascensor::recorridoCola()
 }
 
 
-void Ascensor::upOrDown(char * rotulo)
+//void Ascensor::upOrDown(char * rotulo)
+//{
+//    std::vector<int> baja;
+//    std::vector<int> sube;
+//std::vector<int>::iterator it;
+
+//Orden(); //Se ordenan los vectores de menor a mayor
+//    baja = recorridoInside();
+//    sube = recorridoCola();
+//
+//    //Se baja a la persona.
+//    if(this->pisoActual == baja[2])
+//    {
+//        sprintf( rotulo, "Ascensor[ %d ]: Piso actual %d. --Bajan--\n", this->idAscensor, this->pisoActual );
+//        sprintf( rotulo, "Persona[ %d ]: Bajando en piso %d.\n", baja[0], baja[2] );
+//        //Se elimina esa persona del vector inside
+//        inside.erase(std::find(inside.begin(), inside.end(), baja));
+//        //Se disminuye la capacidad
+//        this->capacidad--;
+//        //Se pasa alguien de la cola de espera a inside
+//        inside.push_back(cola.back());
+//        cola.pop_back();
+//    }
+//    else
+//    {
+//        //Si el ascensor va para arriba
+//        if(this->direccion)
+//        {
+//            if(baja[2] > sube[1])
+//            {
+//                sprintf( rotulo, "Ascensor[ %d ]: Bajan en el piso %d, pero suben en el piso %d. Vamos para el piso %d.\n", baja[2], sube[1], sube[1]);
+//                this->pisoActual=sube[1];
+//            }
+//            else
+//            {
+//                sprintf( rotulo, "Ascensor[ %d ]: Suben en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
+//                this->pisoActual=baja[2];
+//            }
+//        }
+//        //Si el ascensor va para abajo
+//        else
+//        {
+//            if(baja[2] > sube[1])
+//            {
+//                sprintf( rotulo, "Ascensor[ %d ]: Suben en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
+//                this->pisoActual=baja[2];
+//                sprintf( rotulo, "Persona[ %d ]: Baja en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
+//            }
+//            else
+//            {
+//                sprintf( rotulo, "Ascensor[ %d ]: Bajan en el piso %d, pero suben en el piso %d. Vamos para el piso %d.\n", baja[2], sube[1], sube[1]);
+//                this->pisoActual=sube[1];
+//            }
+//        }
+//    }
+//}
+
+std::vector<int> Ascensor::upOrDown(std::vector<std::vector<int>> cola, char * rotulo)
 {
-    std::vector<int> baja;
-    std::vector<int> sube;
-    //std::vector<int>::iterator it;
+    std::vector<int> baja = cola.back();
+    int piso = baja[2];
+    //int id = baja[0];
 
-    Orden(); //Se ordenan los vectores de menor a mayor
-    baja = recorridoInside();
-    sube = recorridoCola();
+    sprintf( rotulo, "Ascensor[ %d ]: Bajan en el piso %d. Vamos para el piso %d. \n", this->idAscensor, piso, piso);
+    this->pisoActual=piso;
+    this->capacidad--;
 
-    //Se baja a la persona.
-    if(this->pisoActual == baja[2])
-    {
-        sprintf( rotulo, "Ascensor[ %d ]: Piso actual %d. --Bajan--\n", this->idAscensor, this->pisoActual );
-        sprintf( rotulo, "Persona[ %d ]: Bajando en piso %d.\n", baja[0], baja[2] );
-        //Se elimina esa persona del vector inside
-        inside.erase(std::find(inside.begin(), inside.end(), baja));
-        //Se disminuye la capacidad
-        this->capacidad--;
-        //Se pasa alguien de la cola de espera a inside
-        inside.push_back(cola.back());
-        cola.pop_back();
-    }
-    else
-    {
-        //Si el ascensor va para arriba
-        if(this->direccion)
-        {
-            if(baja[2] > sube[1])
-            {
-                sprintf( rotulo, "Ascensor[ %d ]: Bajan en el piso %d, pero suben en el piso %d. Vamos para el piso %d.\n", baja[2], sube[1], sube[1]);
-                this->pisoActual=sube[1];
-            }
-            else
-            {
-                sprintf( rotulo, "Ascensor[ %d ]: Suben en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
-                this->pisoActual=baja[2];
-            }
-        }
-        //Si el ascensor va para abajo
-        else
-        {
-            if(baja[2] > sube[1])
-            {
-                sprintf( rotulo, "Ascensor[ %d ]: Suben en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
-                this->pisoActual=baja[2];
-                sprintf( rotulo, "Persona[ %d ]: Baja en el piso %d, pero bajan en el piso %d. Vamos para el piso %d.\n", sube[1], baja[2], baja[2]);
-            }
-            else
-            {
-                sprintf( rotulo, "Ascensor[ %d ]: Bajan en el piso %d, pero suben en el piso %d. Vamos para el piso %d.\n", baja[2], sube[1], sube[1]);
-                this->pisoActual=sube[1];
-            }
-        }
-    }
+    return baja;
+}
+
+void Ascensor::msgBaja(std::vector<int> id, char *rotulo)
+{
+    sprintf( rotulo, "Persona[ %d ]: --Baja en piso %d-- \n", id[0], id[2]);
+}
+
+void Ascensor::msgSube(std::vector<int> id,  char *rotulo)
+{
+    sprintf( rotulo, "Persona[ %d ]: --Sube en piso %d-- \n", id[0], id[1]);
 }
 
 void Ascensor::Display( char * rotulo )

@@ -20,12 +20,13 @@ class Ascensor {
       Ascensor( long );
       ~Ascensor();
       int isFull();
-      void upOrDown(char *);
+      std::vector<int> upOrDown(std::vector<std::vector<int>>, char *);
       void Orden();
       std::vector<int> recorridoInside();
       std::vector<int> recorridoCola();
-      void bajar();
-      void solicitud(std::vector<int>, char*);
+      std::vector<int> solicitud(std::vector<std::vector<int>>, char*);
+      void msgBaja(std::vector<int>, char*);
+      void msgSube(std::vector<int>, char*);
       void Display( char * );
       int getCapacidad();
 

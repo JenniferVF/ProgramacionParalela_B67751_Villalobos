@@ -37,6 +37,7 @@ void * hiloAscensor( void * param )
 
     identificacion = (long) param;
     rotulo = (char *) calloc( 64, 1 );
+    std::vector<int> id;
 
     ascensor = new Ascensor( identificacion );
 
@@ -50,9 +51,17 @@ void * hiloAscensor( void * param )
     {
         mutex->Lock();
         rotulo = (char *) calloc( 64, 1 );
-        ascensor->solicitud(cola.back(), rotulo);
-        cola.pop_back();
+        id = ascensor->solicitud(cola, rotulo);
         printf( "%s", rotulo );
+        ascensor->msgSube(id, rotulo);
+        printf( "%s", rotulo );
+
+        id = ascensor->upOrDown(cola, rotulo);
+        printf( "%s", rotulo );
+        ascensor->msgBaja(id, rotulo);
+        printf( "%s", rotulo );
+        cola.pop_back();
+
         mutex->Unlock();
     }
 
@@ -157,12 +166,6 @@ int main( int argc, char ** argv )
     double used;
     pthread_t ascensor;
     long cantidad = 1;
-
-    std::vector<int> prueba;
-    prueba.push_back(1);
-    prueba.push_back(10);
-    prueba.push_back(4);
-    cola.push_back(prueba);
 
     //srand( time( NULL ) );	// Puede poner esta linea en comentarios para generar una misma secuencia de numeros
     //Ascensores( 1 );
