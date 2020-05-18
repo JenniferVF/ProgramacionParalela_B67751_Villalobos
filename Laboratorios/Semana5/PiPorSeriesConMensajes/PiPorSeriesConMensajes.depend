@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1589751398 source:/home/jennifer/Documentos/C++/PiPorSeriesConMensajes/Buzon.cpp
+	"Buzon.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/types.h>
+	<sys/ipc.h>
+	<sys/msg.h>
+
+1589751365 /home/jennifer/Documentos/C++/PiPorSeriesConMensajes/Buzon.h
+
+1589670434 source:/home/jennifer/Documentos/C++/PiPorSeriesConMensajes/main.cpp
+	<iostream>
+
+1589753277 source:/home/jennifer/Documentos/C++/PiPorSeriesConMensajes/PiPorSeriesConMensajes.cpp
+	<stdlib.h>
+	<stdio.h>
+	<errno.h>
+	<sys/types.h>
+	<unistd.h>
+	<sys/wait.h>
+	<sys/ipc.h>
+	<sys/msg.h>
+	"Buzon.h"
+
