@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1590179849 source:/home/jennifer/Documentos/C++/Agua/Semaforo.cpp
+	<sys/types.h>
+	<sys/ipc.h>
+	<sys/sem.h>
+	<stdio.h>
+	<stdlib.h>
+	"Semaforo.h"
+
+1590193413 /home/jennifer/Documentos/C++/Agua/Semaforo.h
+
