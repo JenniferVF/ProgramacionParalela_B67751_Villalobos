@@ -14,19 +14,19 @@ Numeros::~Numeros()
 /*
 *
 */
-std::vector<std::vector<int>> Numeros::Pares(int rango, int id)
+std::vector<std::vector<int>> Numeros::Pares(int inicio, int fin)
 {
     int start;
     std::vector<int> pares;
     std::vector<int> calculo;
     std::vector<std::vector<int>> todos;
-    start = id;
+    start = inicio;
 
-    if(id == 0){
+    if(inicio == 0){
         start = 4;
     }
 
-    for(int number=start; number <= rango; number++)
+    for(int number=start; number <= fin; number++)
     {
         //Si el numero es par, se agrega al vector
         if(number % 2 == 0)

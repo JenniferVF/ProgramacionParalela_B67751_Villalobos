@@ -1,0 +1,9 @@
+Ambos tienen makefile, pero acá están los comandos para compilar y ejecutar:
+
+NumerosSerial:
+Compilar: g++ main.cpp Numeros.cpp -o num
+Ejecutar: ./num #limite
+
+NumerosHilos:
+Compilar: g++ main.cpp Mutex.cpp Numeros.cpp -lpthread -o num
+Ejecutar: ./num #limite #cant_hilos

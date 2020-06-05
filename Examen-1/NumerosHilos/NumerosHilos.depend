@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1591379345 source:/home/jennifer/Documentos/C++/NumerosHilos/Numeros.cpp
+1591380478 source:/home/jennifer/Documentos/C++/NumerosHilos/Numeros.cpp
 	"Numeros.h"
 	<vector>
 	<string.h>
@@ -10,7 +10,7 @@
 	<string.h>
 	<iostream>
 
-1591379873 source:/home/jennifer/Documentos/C++/NumerosHilos/main.cpp
+1591380467 source:/home/jennifer/Documentos/C++/NumerosHilos/main.cpp
 	<iostream>
 	<ctime>
 	<pthread.h>
