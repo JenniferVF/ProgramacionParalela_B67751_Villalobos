@@ -1,0 +1,31 @@
+# depslib dependency file v1.0
+1591515371 source:/home/jennifer/Documentos/C++/FileReader/main.cpp
+	<iostream>
+	<map>
+	<stdio.h>
+	<stdlib.h>
+	<pthread.h>
+	"FileReader.h"
+	"Mutex.h"
+
+1591509656 source:/home/jennifer/Documentos/C++/FileReader/FileReader.cpp
+	"FileReader.h"
+	<map>
+	<stdio.h>
+	<string.h>
+	<regex>
+	<iostream>
+	<fstream>
+
+1591515371 /home/jennifer/Documentos/C++/FileReader/FileReader.h
+	<map>
+	<stdio.h>
+
+1591512098 /home/jennifer/Documentos/C++/FileReader/Mutex.h
+	<pthread.h>
+
+1591512098 source:/home/jennifer/Documentos/C++/FileReader/Mutex.cpp
+	<stdlib.h>
+	<pthread.h>
+	"Mutex.h"
+
