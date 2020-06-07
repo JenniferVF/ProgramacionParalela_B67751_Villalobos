@@ -19,78 +19,84 @@ FileReader::FileReader(const char * archivo, int trabajadores, int estrategia)
 //buffer [trabajadores]; //con 1024 bytes de cada trabajador
 }
 
-FileReader::~FileReader()
+FileReader::~FileReader() //char* line
 {
-
+//    free( line );
+//
+//    fclose( this->fileId );
 }
 
-bool FileReader::hasNext(int trabajador)
-{
-
-}
-
-int FileReader::getNext(char ** line, int trabajador)
-{
-
-}
+//bool FileReader::hasNext(int trabajador)
+//{
+//
+//}
+//
+//int FileReader::getNext(char ** line, int trabajador)
+//{
+//
+//}
 
 /*
 *Metodo encargado de
 */
 void FileReader::Read(int argc, char ** argv)
 {
-    FILE * fileId;
     char * line;
     fpos_t inicio;
 
-    //std::map<std::string, int> etiquetas;
     this->etiquetas = inicializar(this->etiquetas);
 
 
-    if ( argc < 2 )
+    if ( argc < 4 )
     {
-        printf( "Por favor ingrese el archivo a utilizar.\n" );
+        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
         exit( 1 );
     }
 
-    //this->workers = argv[ 2 ];
     line = (char *) calloc( 512, 1 );
 
-    fileId = fopen( argv[ 1 ], "r" );
-    if ( NULL == fileId )
+    this->fileId = fopen( argv[ 1 ], "r" );
+    if ( NULL == this->fileId )
     {
         perror( "El archivo no se pudo abrir.\n");
         exit( 2 );
     }
-    fgetpos(fileId, &inicio);
+    //Se toma la posicion inicial del archivo.
+    fgetpos(this->fileId, &inicio);
 
+    //Actualizacion de las variables privadas.
+    this->workers = atoi(argv[ 2 ]);
+    this->strategy = atoi(argv[ 3 ]);
 
     this->totalLines = countLines(fileId, line);
     printf("total lines: %d\n", this->totalLines);
 
+    //Si el total de lineas es divisible entre la cantidad de trabajadores.
     if(this->totalLines%this->workers == 0)
     {
         this->range = this->totalLines/this->workers;
         this->rangeMaster = this->totalLines/this->workers;
     }
+    //En caso contrario, se le asigna a algun hilo el rangeMaster, que consiste
+    //en el rango mas el "sobro" de la division.
     else
     {
         this->range = this->totalLines/this->workers;
         this->rangeMaster = (this->totalLines-(range*this->workers));
     }
 
+    //Se posiciona al inicio del archivo.
+    fsetpos(this->fileId, &inicio);
 
-    fsetpos(fileId, &inicio);
-
-    etiquetas = OnlyOne(fileId, line, etiquetas);
-
+    //Se llama al metodo que almacena todas las estrategias.
+    etiquetas = Estrategias(fileId, line, etiquetas, range, 0, strategy); //Zero(fileId, line, etiquetas);
 
     free( line );
 
-    fclose( fileId );
+    fclose( this->fileId );
 
     imprimir(etiquetas); //Se imprimen las etiquetas encontradas, con sus respectivos contadores
-    //return etiquetas;
+
 }
 
 
@@ -143,14 +149,6 @@ std::map<std::string, int> FileReader::processLine( const char * line, std::map<
 
 
 /*
-*
-*/
-std::map<std::string, int> FileReader::Estrategias(FILE * archivo, char * line, std::map<std::string, int> etiquetas, int rango, int id)
-{
-
-}
-
-/*
 *Metodo encargado de comparar la palabra entrante con cada una de las
 *etiquetas guardadas en el mapa.
 */
@@ -177,10 +175,34 @@ std::map<std::string, int> FileReader::comparar(char * token, std::map<std::stri
 
 
 /*
+*Metodo que almacena todas las estrategias de lectura.
+*/
+std::map<std::string, int> FileReader::Estrategias(FILE * archivo, char * line, std::map<std::string, int> etiquetas, int rango, int id, int estrategia)
+{
+    switch(estrategia)
+    {
+    case 0:
+        etiquetas = Zero(archivo, line, etiquetas);
+        break;
+    case 1:
+        etiquetas = One(archivo, line, etiquetas, rango);
+        break;
+    case 2:
+        etiquetas = Two(archivo, line, etiquetas, rango, id);
+        break;
+    case 3:
+        etiquetas = Three(archivo, line, etiquetas);
+    }
+
+    return etiquetas;
+}
+
+
+/*
 *Estrategia por defecto: todo el trabajo lo
 *realiza un solo trabajador.
 */
-std::map<std::string, int> FileReader::OnlyOne(FILE * archivo, char * line, std::map<std::string, int> etiquetas)
+std::map<std::string, int> FileReader::Zero(FILE * archivo, char * line, std::map<std::string, int> etiquetas)
 {
     int chars;
     size_t size;
@@ -210,7 +232,7 @@ std::map<std::string, int> FileReader::One(FILE * archivo, char * line, std::map
 {
     int chars;
     size_t size;
-    int contador = 0;
+    int contador = 0; //Almacena las lineas que lleva hasta el momento.
 
     size = 512;
 
@@ -223,7 +245,7 @@ std::map<std::string, int> FileReader::One(FILE * archivo, char * line, std::map
         }
         contador++;
     }
-    while ( (chars > 0) && (contador <= rango) );
+    while ( (chars > 0) && (contador <= rango) );  //Si todavia no llega al rango correspondiente, continua.
 
     return etiquetas;
 }
@@ -246,14 +268,14 @@ std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map
     {
         chars = getline( & line, & size, archivo );
 
-        if( (chars > 0) && (resultado == 0) )
+        if( (chars > 0) && (resultado == 0) )  //Si el residuo da 0, esa linea le pertenece.
         {
             etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
         }
         num_linea++;
         resultado = num_linea % id;
     }
-    while ( (chars > 0) && (resultado == 0) );
+    while ( (chars > 0) );
 
     return etiquetas;
 }
@@ -262,7 +284,23 @@ std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map
 /*
 *Estrategia #3: entregar las lineas por demanda.
 */
+std::map<std::string, int> FileReader::Three(FILE * archivo, char * line, std::map<std::string, int> etiquetas)
+{
+    int chars;
+    size_t size;
 
+    size = 512;
+
+    chars = getline( & line, & size, archivo );
+
+    //Se procesa solo una linea del archivo y los contadores del mapa se actualizan.
+    if( chars > 0 )
+    {
+        etiquetas = processLine( line, etiquetas);
+    }
+
+    return etiquetas;
+}
 
 
 /*
@@ -272,32 +310,6 @@ std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map
 
 /*
 
-Caso trabajadores == 1:
-Todo el archivo se le entrega linea por linea al trabajador
-
-Caso trabajadores >= 2:
-    estrategia == 1: //grupos contiguos de lineas L/trabajadores
-        Primer trabajador, le damos la primera mitad del archivo
-        Linea x linea, variable por la linea que vamos
-
-        Segundo trabajador, le damos la otra mitad del archivo
-
-    estrategia == 2: //grupos no contiguos de lineas linea%trabajadores == 0
-        Primer trabajador --> primera linea, tercera linea
-        Segundo trabajador --> segunda linea, cuarta linea
-
-    estrategia == 3: //por demanda
-        Primer linea del primer trabajador que la pida
-        Segunda linea del segundo trabajador que la pida
-
-        --> una variable para todos los trabajadores, para saber por donde se va leyendo el archivo
-
-
-    estrategia == 4 (inventada, al reves)
-        Primer trabajador, ultima linea
-        Segundo trabajador, penultima linea
-
-*/
 
 
 /*
@@ -546,4 +558,60 @@ std::map<std::string, int> FileReader::inicializar(std::map<std::string, int> et
     etiquetas["/wbr"]=0;
 
     return etiquetas;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+int FileReader::getStrategy()
+{
+    return this->strategy;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+int FileReader::getRange()
+{
+    return this->range;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+int FileReader::getRangeMaster()
+{
+    return this->rangeMaster;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+int FileReader::getWorkers()
+{
+    return this->workers;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+FILE * FileReader::getFile()
+{
+    return this->fileId;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+std::map<std::string, int> FileReader::getMap()
+{
+    return this->etiquetas;
+}
+
+/*
+*Metodo que implanta el atributo privado
+*/
+void FileReader::setMap(std::map<std::string, int> actualizado)
+{
+    this->etiquetas = actualizado;
 }

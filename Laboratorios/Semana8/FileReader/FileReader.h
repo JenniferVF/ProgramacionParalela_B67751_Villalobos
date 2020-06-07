@@ -17,14 +17,23 @@ class FileReader{
     int countLines(FILE*, char*);
     std::map<std::string, int> processLine( const char * , std::map<std::string, int>);
 
-    std::map<std::string, int> OnlyOne(FILE *, char *, std::map<std::string, int>);
+    std::map<std::string, int> Zero(FILE *, char *, std::map<std::string, int>);
     std::map<std::string, int> One(FILE *, char *, std::map<std::string, int>, int);
     std::map<std::string, int> Two(FILE *, char *, std::map<std::string, int>, int, int);
-    std::map<std::string, int> Estrategias(FILE *, char *, std::map<std::string, int>, int, int);
+    std::map<std::string, int> Three(FILE *, char *, std::map<std::string, int>);
+    std::map<std::string, int> Estrategias(FILE *, char *, std::map<std::string, int>, int, int, int);
 
     std::map<std::string, int> comparar(char * , std::map<std::string, int>);
     void imprimir(std::map<std::string, int>);
     std::map<std::string, int> inicializar(std::map<std::string, int>);
+
+    int getStrategy();
+    int getRange();
+    int getRangeMaster();
+    int getWorkers();
+    FILE* getFile();
+    std::map<std::string, int> getMap();
+    void setMap(std::map<std::string, int>);
 
     private:
     int workers;			// Workers that read the file
