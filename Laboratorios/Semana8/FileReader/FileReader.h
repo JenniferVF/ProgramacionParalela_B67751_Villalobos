@@ -2,6 +2,7 @@
 #define FILEREADER_H_INCLUDED
 
 #include <map>
+#include <string>
 #include <stdio.h>
 
 class FileReader{
@@ -14,14 +15,14 @@ class FileReader{
     int getNext( char ** line, int worker = 0 );
 
     void Read(int , char **);
-    int countLines(FILE*, char*);
+    int countLines(FILE*);
     std::map<std::string, int> processLine( const char * , std::map<std::string, int>);
 
-    std::map<std::string, int> Zero(FILE *, char *, std::map<std::string, int>);
-    std::map<std::string, int> One(FILE *, char *, std::map<std::string, int>, int);
-    std::map<std::string, int> Two(FILE *, char *, std::map<std::string, int>, int, int);
-    std::map<std::string, int> Three(FILE *, char *, std::map<std::string, int>);
-    std::map<std::string, int> Estrategias(FILE *, char *, std::map<std::string, int>, int, int, int);
+    std::map<std::string, int> Zero(FILE *, std::map<std::string, int>, std::string);
+    std::map<std::string, int> One(FILE *, std::map<std::string, int>, int);
+    std::map<std::string, int> Two(FILE *, std::map<std::string, int>, int, int);
+    std::map<std::string, int> Three(FILE *, std::map<std::string, int>);
+    std::map<std::string, int> Estrategias(FILE *, std::map<std::string, int>, int, int, int, std::string);
 
     std::map<std::string, int> comparar(char * , std::map<std::string, int>);
     void imprimir(std::map<std::string, int>);
@@ -31,6 +32,8 @@ class FileReader{
     int getRange();
     int getRangeMaster();
     int getWorkers();
+    fpos_t getPos();
+    std::string getFilename();
     FILE* getFile();
     std::map<std::string, int> getMap();
     void setMap(std::map<std::string, int>);
@@ -43,6 +46,8 @@ class FileReader{
 
     int range;
     int rangeMaster;
+    fpos_t inicio;  //posicion de inicio del archivo
+    std::string filename;
     std::map<std::string, int> etiquetas;
 };
 

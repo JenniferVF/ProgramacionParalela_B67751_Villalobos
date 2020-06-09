@@ -2,6 +2,7 @@
 #include <map>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <regex>
 #include <iostream>
 #include <fstream>
@@ -19,11 +20,9 @@ FileReader::FileReader(const char * archivo, int trabajadores, int estrategia)
 //buffer [trabajadores]; //con 1024 bytes de cada trabajador
 }
 
-FileReader::~FileReader() //char* line
+FileReader::~FileReader()
 {
-//    free( line );
-//
-//    fclose( this->fileId );
+    fclose( this->fileId );
 }
 
 //bool FileReader::hasNext(int trabajador)
@@ -41,9 +40,6 @@ FileReader::~FileReader() //char* line
 */
 void FileReader::Read(int argc, char ** argv)
 {
-    char * line;
-    fpos_t inicio;
-
     this->etiquetas = inicializar(this->etiquetas);
 
 
@@ -53,9 +49,11 @@ void FileReader::Read(int argc, char ** argv)
         exit( 1 );
     }
 
-    line = (char *) calloc( 512, 1 );
 
-    this->fileId = fopen( argv[ 1 ], "r" );
+    this->filename = argv[ 1 ];
+    const char * name = filename.c_str();
+    this->fileId = fopen( name, "r" );
+
     if ( NULL == this->fileId )
     {
         perror( "El archivo no se pudo abrir.\n");
@@ -64,12 +62,14 @@ void FileReader::Read(int argc, char ** argv)
     //Se toma la posicion inicial del archivo.
     fgetpos(this->fileId, &inicio);
 
+
     //Actualizacion de las variables privadas.
     this->workers = atoi(argv[ 2 ]);
     this->strategy = atoi(argv[ 3 ]);
 
-    this->totalLines = countLines(fileId, line);
-    printf("total lines: %d\n", this->totalLines);
+    this->totalLines = countLines(this->fileId);
+    printf("Total lines: %d\n", this->totalLines);
+
 
     //Si el total de lineas es divisible entre la cantidad de trabajadores.
     if(this->totalLines%this->workers == 0)
@@ -85,17 +85,12 @@ void FileReader::Read(int argc, char ** argv)
         this->rangeMaster = (this->totalLines-(range*this->workers));
     }
 
+
     //Se posiciona al inicio del archivo.
     fsetpos(this->fileId, &inicio);
 
-    //Se llama al metodo que almacena todas las estrategias.
-    etiquetas = Estrategias(fileId, line, etiquetas, range, 0, strategy); //Zero(fileId, line, etiquetas);
-
-    free( line );
 
     fclose( this->fileId );
-
-    imprimir(etiquetas); //Se imprimen las etiquetas encontradas, con sus respectivos contadores
 
 }
 
@@ -103,13 +98,15 @@ void FileReader::Read(int argc, char ** argv)
 /*
 *Metodo encargado de contar las lineas del archivo entrante
 */
-int FileReader::countLines(FILE * archivo, char* line)
+int FileReader::countLines(FILE * archivo)
 {
     int cant_lineas = 0;
     int chars;
     size_t size;
-
+    char * line;
     size = 512;
+
+    line = (char *) calloc( 512, 1 );
 
     do
     {
@@ -121,6 +118,7 @@ int FileReader::countLines(FILE * archivo, char* line)
     }
     while ( chars > 0 );
 
+    free(line);
     return cant_lineas;
 }
 
@@ -177,21 +175,21 @@ std::map<std::string, int> FileReader::comparar(char * token, std::map<std::stri
 /*
 *Metodo que almacena todas las estrategias de lectura.
 */
-std::map<std::string, int> FileReader::Estrategias(FILE * archivo, char * line, std::map<std::string, int> etiquetas, int rango, int id, int estrategia)
+std::map<std::string, int> FileReader::Estrategias(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id, int estrategia, std::string filename)
 {
     switch(estrategia)
     {
     case 0:
-        etiquetas = Zero(archivo, line, etiquetas);
+        etiquetas = Zero(archivo, etiquetas, filename);
         break;
     case 1:
-        etiquetas = One(archivo, line, etiquetas, rango);
+        etiquetas = One(archivo, etiquetas, rango);
         break;
     case 2:
-        etiquetas = Two(archivo, line, etiquetas, rango, id);
+        etiquetas = Two(archivo, etiquetas, rango, id);
         break;
     case 3:
-        etiquetas = Three(archivo, line, etiquetas);
+        etiquetas = Three(archivo, etiquetas);
     }
 
     return etiquetas;
@@ -202,16 +200,22 @@ std::map<std::string, int> FileReader::Estrategias(FILE * archivo, char * line, 
 *Estrategia por defecto: todo el trabajo lo
 *realiza un solo trabajador.
 */
-std::map<std::string, int> FileReader::Zero(FILE * archivo, char * line, std::map<std::string, int> etiquetas)
+std::map<std::string, int> FileReader::Zero(FILE * archivo, std::map<std::string, int> etiquetas, std::string filename)
 {
     int chars;
     size_t size;
-
+    char * line = NULL;
     size = 512;
+    line = (char *) calloc( 512, 1 );
+    //fsetpos(archivo, &inicio);
+
+    const char * name = filename.c_str();
+    FILE * fichero = fopen(name, "r");
 
     do
     {
-        chars = getline( & line, & size, archivo );
+        chars = getline( & line, & size, fichero );
+
         if( chars > 0 )
         {
             etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
@@ -219,22 +223,26 @@ std::map<std::string, int> FileReader::Zero(FILE * archivo, char * line, std::ma
     }
     while ( chars > 0 );
 
+
+    free(line);
+    fclose(fichero);
+
     return etiquetas;
 }
-
 
 
 /*
 *Estrategia #1: dividir el total de lineas del archivo
 *entre la cantidad de trabajadores.
 */
-std::map<std::string, int> FileReader::One(FILE * archivo, char * line, std::map<std::string, int> etiquetas, int rango)
+std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string, int> etiquetas, int rango)
 {
     int chars;
     size_t size;
+    char * line;
     int contador = 0; //Almacena las lineas que lleva hasta el momento.
-
     size = 512;
+    line = (char *) calloc( 512, 1 );
 
     do
     {
@@ -247,6 +255,7 @@ std::map<std::string, int> FileReader::One(FILE * archivo, char * line, std::map
     }
     while ( (chars > 0) && (contador <= rango) );  //Si todavia no llega al rango correspondiente, continua.
 
+    free(line);
     return etiquetas;
 }
 
@@ -255,14 +264,15 @@ std::map<std::string, int> FileReader::One(FILE * archivo, char * line, std::map
 *Estrategia #2: dividir en grupos no contiguos de lineas
 *linea%trabajadores == 0.
 */
-std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map<std::string, int> etiquetas, int rango, int id)
+std::map<std::string, int> FileReader::Two(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id)
 {
     int chars;
     size_t size;
     int num_linea = 0;
     int resultado = num_linea % id;
-
+    char * line;
     size = 512;
+    line = (char *) calloc( 512, 1 );
 
     do
     {
@@ -277,6 +287,7 @@ std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map
     }
     while ( (chars > 0) );
 
+    free(line);
     return etiquetas;
 }
 
@@ -284,12 +295,13 @@ std::map<std::string, int> FileReader::Two(FILE * archivo, char * line, std::map
 /*
 *Estrategia #3: entregar las lineas por demanda.
 */
-std::map<std::string, int> FileReader::Three(FILE * archivo, char * line, std::map<std::string, int> etiquetas)
+std::map<std::string, int> FileReader::Three(FILE * archivo, std::map<std::string, int> etiquetas)
 {
     int chars;
     size_t size;
-
+    char * line;
     size = 512;
+    line = (char *) calloc( 512, 1 );
 
     chars = getline( & line, & size, archivo );
 
@@ -299,6 +311,7 @@ std::map<std::string, int> FileReader::Three(FILE * archivo, char * line, std::m
         etiquetas = processLine( line, etiquetas);
     }
 
+    free(line);
     return etiquetas;
 }
 
@@ -308,7 +321,6 @@ std::map<std::string, int> FileReader::Three(FILE * archivo, char * line, std::m
 *
 */
 
-/*
 
 
 
@@ -595,6 +607,15 @@ int FileReader::getWorkers()
 /*
 *Metodo que retorna el atributo privado
 */
+fpos_t FileReader::getPos()
+{
+    return this->inicio;
+}
+
+
+/*
+*Metodo que retorna el atributo privado
+*/
 FILE * FileReader::getFile()
 {
     return this->fileId;
@@ -606,6 +627,14 @@ FILE * FileReader::getFile()
 std::map<std::string, int> FileReader::getMap()
 {
     return this->etiquetas;
+}
+
+/*
+*Metodo que retorna el atributo privado
+*/
+std::string FileReader::getFilename()
+{
+    return this->filename;
 }
 
 /*
