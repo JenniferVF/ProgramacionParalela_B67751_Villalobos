@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <stdio.h>
+#include <unistd.h>
 #include <string>
 #include <string.h>
 #include <vector>
@@ -71,6 +72,7 @@ void * hiloTrabajador( void * args_void )
     fpos_t pos; //Variable que guarda la posicion en el archivo.
     FILE * fichero;  //Es necesario?
     bool finish = false;  //Variable que indica si el hilo ya finalizo la lectura.
+    int contador = 0; //En caso de que sea la estrategia 1.
 
     struct Result * resultado = (struct Result*) calloc(1, sizeof *resultado);
     resultado->actualizado = file->inicializar(resultado->actualizado);
@@ -96,24 +98,32 @@ void * hiloTrabajador( void * args_void )
     }
 
 
-    mutex->Lock();
-
-    do{
-    if(busy == false)
+    do
     {
-        busy = true;
-        pos = positions.at(idLec); //Se toma la posicion del archivo.
-        //Realiza la estrategia que le corresponde
-        recolecta = file->Estrategias(fichero, recolecta, rango, id, strategy, name, pos);
-        pos = file->getPos();
-        positions.at(idLec) = pos; //Se actualiza el vector de posiciones
-        finish = file->getFinish();
-        busy = false;
-    }
+        if(busy == false)
+        {
+            mutex->Lock();
+            busy = true;
+            pos = positions.at(idLec); //Se toma la posicion del archivo.
+
+            //Realiza la estrategia que le corresponde
+            recolecta = file->Estrategias(fichero, recolecta, rango, id, strategy, name, pos, contador);
+
+            contador++;
+            pos = file->getPos();
+            positions.at(idLec) = pos; //Se actualiza el vector de posiciones
+            finish = file->getFinish();
+
+            busy = false;
+            mutex->Unlock();
+        }
+        else
+        {
+            usleep(50);
+        }
     }
     while(finish == false);
 
-    mutex->Unlock();
 
     resultado->actualizado = recolecta;
 
@@ -148,7 +158,7 @@ void * CrearTrabajadores( long cantidad, struct Data_Worker trabajador, std::map
     for ( hilo = 0; hilo < cantidad; hilo++ )
     {
         pthread_join( worker[ hilo ], &out );
-        printf("Sale %li trabajador del join\n", hilo);
+        printf("Trabajador %li finaliza.\n", hilo);
         resultado = (struct Result*) out;
         actualizar = resultado->actualizado;
 

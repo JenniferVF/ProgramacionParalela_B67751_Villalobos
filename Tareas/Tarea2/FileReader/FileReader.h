@@ -19,10 +19,11 @@ class FileReader{
     std::map<std::string, int> processLine( const char * , std::map<std::string, int>);
 
     std::map<std::string, int> Zero(FILE *, std::map<std::string, int>, std::string);
-    std::map<std::string, int> One(FILE *, std::map<std::string, int>, int, fpos_t, std::string);
-    std::map<std::string, int> Two(FILE *, std::map<std::string, int>, int, int);
-    std::map<std::string, int> Three(FILE *, std::map<std::string, int>);
-    std::map<std::string, int> Estrategias(FILE *, std::map<std::string, int>, int, int, int, std::string, fpos_t);
+    std::map<std::string, int> One(FILE *, std::map<std::string, int>, int, fpos_t, std::string, int);
+    std::map<std::string, int> Two(FILE *, std::map<std::string, int>, int, int, fpos_t, std::string);
+    std::map<std::string, int> Three(FILE *, std::map<std::string, int>, fpos_t, std::string);
+    std::map<std::string, int> Four(FILE *, std::map<std::string, int>, int, fpos_t, std::string);
+    std::map<std::string, int> Estrategias(FILE *, std::map<std::string, int>, int, int, int, std::string, fpos_t, int);
 
     std::map<std::string, int> comparar(char * , std::map<std::string, int>);
     void imprimir(std::map<std::string, int>);

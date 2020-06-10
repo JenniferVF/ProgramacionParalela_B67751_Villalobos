@@ -68,6 +68,17 @@ void FileReader::Read(int argc, char ** argv)
     this->workers = atoi(argv[ 2 ]);
     this->strategy = atoi(argv[ 3 ]);
 
+    if(this->strategy == 0)
+    {
+        this->workers = 1;
+    }
+    else if(this->strategy > 4)
+    {
+        printf("No existe una estrategia con ese numero. Se utiliza la estrategia por default: 0.\n");
+        this->strategy = 0;
+        this->workers = 1;
+    }
+
     this->totalLines = countLines(this->fileId);
     printf("Total lines: %d\n", this->totalLines);
 
@@ -83,7 +94,7 @@ void FileReader::Read(int argc, char ** argv)
     else
     {
         this->range = this->totalLines/this->workers;
-        this->rangeMaster = (this->totalLines-(range*this->workers));
+        this->rangeMaster = (this->totalLines-(range*(this->workers-1)));
     }
 
 
@@ -177,7 +188,7 @@ std::map<std::string, int> FileReader::comparar(char * token, std::map<std::stri
 /*
 *Metodo que almacena todas las estrategias de lectura.
 */
-std::map<std::string, int> FileReader::Estrategias(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id, int estrategia, std::string filename, fpos_t posicion)
+std::map<std::string, int> FileReader::Estrategias(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id, int estrategia, std::string filename, fpos_t posicion, int contador)
 {
     switch(estrategia)
     {
@@ -185,13 +196,16 @@ std::map<std::string, int> FileReader::Estrategias(FILE * archivo, std::map<std:
         etiquetas = Zero(archivo, etiquetas, filename);
         break;
     case 1:
-        etiquetas = One(archivo, etiquetas, rango, posicion, filename);
+        etiquetas = One(archivo, etiquetas, rango, posicion, filename, contador);
         break;
     case 2:
-        etiquetas = Two(archivo, etiquetas, rango, id);
+        etiquetas = Two(archivo, etiquetas, rango, id, posicion, filename);
         break;
     case 3:
-        etiquetas = Three(archivo, etiquetas);
+        etiquetas = Three(archivo, etiquetas, posicion, filename);
+        break;
+    case 4:
+        etiquetas = Four(archivo, etiquetas, rango, posicion, filename);
     }
 
     return etiquetas;
@@ -236,7 +250,145 @@ std::map<std::string, int> FileReader::Zero(FILE * archivo, std::map<std::string
 *Estrategia #1: dividir el total de lineas del archivo
 *entre la cantidad de trabajadores.
 */
-std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string, int> etiquetas, int rango, fpos_t posicion, std::string filename)
+std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string, int> etiquetas, int rango, fpos_t posicion, std::string filename, int contador)
+{
+    int chars;
+    size_t size;
+    char * line = NULL;
+    fpos_t nueva;
+
+    size = 512;
+    line = (char *) calloc( 512, 1 );
+
+    const char * name = filename.c_str();
+    FILE * fichero = fopen(name, "r");
+
+    fsetpos(fichero, &posicion);
+
+    if(contador == rango) //Si ya hizo su bloque correspondiente
+    {
+        setFinish();
+    }
+    else
+    {
+        chars = getline( & line, & size, fichero );
+
+        if( chars > 0 )
+        {
+            etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
+        }
+        else
+        {
+            setFinish();
+        }
+    }
+
+
+    fgetpos(fichero, &nueva);
+    setPos(nueva);
+
+    free(line);
+    fclose(fichero);
+
+    return etiquetas;
+}
+
+
+/*
+*Estrategia #2: dividir en grupos no contiguos de lineas
+*linea%trabajadores == 0.
+*/
+std::map<std::string, int> FileReader::Two(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id, fpos_t posicion, std::string filename)
+{
+    int chars;
+    size_t size;
+    int num_linea = 0;
+    int resultado;
+    char * line;
+    fpos_t nueva;
+
+    //Para evitar errores al dividir por cero (id del primer trabajador)
+    int identificacion = id+1;
+
+    size = 512;
+    line = (char *) calloc( 512, 1 );
+
+    const char * name = filename.c_str();
+    FILE * fichero = fopen(name, "r");
+
+    fsetpos(fichero, &posicion);
+
+
+    resultado = num_linea % identificacion;
+
+    do
+    {
+        chars = getline( & line, & size, fichero );
+
+        if( (chars > 0) && (resultado == 0) )  //Si el residuo da 0, esa linea le pertenece.
+        {
+            etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
+        }
+        num_linea++;
+        resultado = num_linea % identificacion;
+    }
+    while ( (chars > 0) );
+
+
+    fgetpos(fichero, &nueva);
+    setPos(nueva);
+    setFinish();
+
+    fclose(fichero);
+    free(line);
+    return etiquetas;
+}
+
+
+/*
+*Estrategia #3: entregar las lineas por demanda.
+*/
+std::map<std::string, int> FileReader::Three(FILE * archivo, std::map<std::string, int> etiquetas, fpos_t posicion, std::string filename)
+{
+    int chars;
+    size_t size;
+    char * line;
+    fpos_t nueva;
+
+    size = 512;
+    line = (char *) calloc( 512, 1 );
+
+    const char * name = filename.c_str();
+    FILE * fichero = fopen(name, "r");
+
+    fsetpos(fichero, &posicion);
+
+    chars = getline( & line, & size, fichero );
+
+    //Se procesa solo una linea del archivo y los contadores del mapa se actualizan.
+    if( chars > 0 )
+    {
+        etiquetas = processLine( line, etiquetas);
+    }
+    else
+    {
+        setFinish();
+    }
+
+    fgetpos(fichero, &nueva);
+    setPos(nueva);
+
+    free(line);
+    fclose(fichero);
+    return etiquetas;
+}
+
+
+/*
+*Estrategia #4: inventada.
+*
+*/
+std::map<std::string, int> FileReader::Four(FILE * archivo, std::map<std::string, int> etiquetas, int rango, fpos_t posicion, std::string filename)
 {
     int chars;
     size_t size;
@@ -275,69 +427,6 @@ std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string,
 
     return etiquetas;
 }
-
-
-/*
-*Estrategia #2: dividir en grupos no contiguos de lineas
-*linea%trabajadores == 0.
-*/
-std::map<std::string, int> FileReader::Two(FILE * archivo, std::map<std::string, int> etiquetas, int rango, int id)
-{
-    int chars;
-    size_t size;
-    int num_linea = 0;
-    int resultado = num_linea % id;
-    char * line;
-    size = 512;
-    line = (char *) calloc( 512, 1 );
-
-    do
-    {
-        chars = getline( & line, & size, archivo );
-
-        if( (chars > 0) && (resultado == 0) )  //Si el residuo da 0, esa linea le pertenece.
-        {
-            etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
-        }
-        num_linea++;
-        resultado = num_linea % id;
-    }
-    while ( (chars > 0) );
-
-    free(line);
-    return etiquetas;
-}
-
-
-/*
-*Estrategia #3: entregar las lineas por demanda.
-*/
-std::map<std::string, int> FileReader::Three(FILE * archivo, std::map<std::string, int> etiquetas)
-{
-    int chars;
-    size_t size;
-    char * line;
-    size = 512;
-    line = (char *) calloc( 512, 1 );
-
-    chars = getline( & line, & size, archivo );
-
-    //Se procesa solo una linea del archivo y los contadores del mapa se actualizan.
-    if( chars > 0 )
-    {
-        etiquetas = processLine( line, etiquetas);
-    }
-
-    free(line);
-    return etiquetas;
-}
-
-
-/*
-*Estrategia #4: inventada.
-*
-*/
-
 
 
 
