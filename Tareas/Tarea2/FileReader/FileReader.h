@@ -14,7 +14,7 @@ class FileReader{
     bool hasNext( int worker = 0 );
     int getNext( char ** line, int worker = 0 );
 
-    void Read(int , char **);
+    void Read(int , int, std::string);
     int countLines(FILE*);
     std::map<std::string, int> processLine( const char * , std::map<std::string, int>);
 

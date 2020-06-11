@@ -35,23 +35,24 @@ FileReader::~FileReader()
 //
 //}
 
+
 /*
-*Metodo encargado de
+*Metodo encargado de inicializar los datos necesitados por el Lector.
 */
-void FileReader::Read(int argc, char ** argv)
+void FileReader::Read(int trabajadores, int estrategia, std::string archivo)
 {
     fpos_t inicio;
     this->etiquetas = inicializar(this->etiquetas);
 
 
-    if ( argc < 4 )
-    {
-        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
-        exit( 1 );
-    }
+//    if ( argc < 4 )
+//    {
+//        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
+//        exit( 1 );
+//    }
 
 
-    this->filename = argv[ 1 ];
+    this->filename = archivo;
     const char * name = filename.c_str();
     this->fileId = fopen( name, "r" );
 
@@ -65,8 +66,8 @@ void FileReader::Read(int argc, char ** argv)
 
 
     //Actualizacion de las variables privadas.
-    this->workers = atoi(argv[ 2 ]);
-    this->strategy = atoi(argv[ 3 ]);
+    this->workers = trabajadores;
+    this->strategy = estrategia;
 
     if(this->strategy == 0)
     {
@@ -276,6 +277,8 @@ std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string,
         if( chars > 0 )
         {
             etiquetas = processLine( line, etiquetas);  //Se procesa cada linea del archivo, los contadores del mapa se actualizan
+            fgetpos(fichero, &nueva);
+            setPos(nueva);
         }
         else
         {
@@ -283,9 +286,6 @@ std::map<std::string, int> FileReader::One(FILE * archivo, std::map<std::string,
         }
     }
 
-
-    fgetpos(fichero, &nueva);
-    setPos(nueva);
 
     free(line);
     fclose(fichero);

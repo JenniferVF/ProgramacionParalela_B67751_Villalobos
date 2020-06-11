@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string>
 #include <string.h>
+#include <sstream>
 #include <vector>
 #include <stdlib.h>
 #include <pthread.h>
@@ -14,9 +15,12 @@ using namespace std;
 
 //Shared variables
 Mutex * mutex;
-bool busy = false;
+//bool busy = false;
 std::vector< std::string > archivos; //Almacena el archivo por leer en la casilla correspondiente al id de cada lector.
-std::vector< fpos_t > positions(1); //Almacena la posicion del archivo por la que va cada lector.
+std::vector< fpos_t > positions; //Almacena la posicion del archivo por la que va cada lector.
+std::vector< int > estrategias; //Almacena las estrategias de cada archivo.
+std::vector< bool > semaforo; //Almacena los booleanos que actuan como semaforos.
+
 
 /*
 *Estructura que almacena los datos necesitados
@@ -32,6 +36,27 @@ struct Data_Worker
     FILE * archivo;
 };
 
+
+/*
+*Estructura que contiene los datos necesarios
+*de un hilo Lector.
+*/
+struct Data_Lector
+{
+    int identificacion;
+    int trabajadores;
+};
+
+
+/*
+*Estructura que contiene los datos necesitados
+*por el hilo maestro.
+*/
+struct Data_Master
+{
+    int cant_arg;
+    char ** argumentos;
+};
 /*
 *Estructura que almacena el resultado de cada
 *hilo (el mapa de etiquetas actualizado).
@@ -41,19 +66,6 @@ struct Result
     std::map<std::string, int> actualizado;
 };
 
-
-/*
-*Estructura que contiene los datos necesarios
-*de un hilo Lector.
-*/
-struct Data_Lector
-{
-    FILE * archivo;
-    int identificacion;
-    int argc;
-    char ** argv;
-
-};
 
 
 /*
@@ -85,7 +97,8 @@ void * hiloTrabajador( void * args_void )
     fichero = datos->archivo;
 
     std::map<std::string, int> recolecta = file->inicializar(recolecta);
-    std::string name = archivos.back();
+    std::string name = archivos.at(idLec);
+    //bool busy = semaforo.at(idLec);
 
 
     if(id == 0)
@@ -100,10 +113,10 @@ void * hiloTrabajador( void * args_void )
 
     do
     {
-        if(busy == false)
+        if(semaforo.at(idLec) == false)
         {
             mutex->Lock();
-            busy = true;
+            semaforo.at(idLec) = true;
             pos = positions.at(idLec); //Se toma la posicion del archivo.
 
             //Realiza la estrategia que le corresponde
@@ -114,7 +127,7 @@ void * hiloTrabajador( void * args_void )
             positions.at(idLec) = pos; //Se actualiza el vector de posiciones
             finish = file->getFinish();
 
-            busy = false;
+            semaforo.at(idLec) = false;
             mutex->Unlock();
         }
         else
@@ -184,7 +197,6 @@ void * CrearTrabajadores( long cantidad, struct Data_Worker trabajador, std::map
 */
 void * hiloLector( void * args_void )
 {
-
     FileReader * file;
     mutex = new Mutex();
     file = new FileReader();
@@ -197,7 +209,7 @@ void * hiloLector( void * args_void )
 
     const int id = datos->identificacion;
 
-    file->Read(datos->argc, datos->argv);
+    file->Read(datos->trabajadores, estrategias.at(id), archivos.at(id));
 
 
     //Se llenan los datos de la estructura a enviar.
@@ -211,6 +223,8 @@ void * hiloLector( void * args_void )
     //Se actualiza el vector de posiciones
     positions.at(id) = file->getPos();
 
+    //Se actualiza el vector semaforo
+    semaforo.at(id) = false;
 
     //Se crean los trabajadores. Cada uno hace su tarea y juntos retornan
     //el mapa de etiquetas actualizado.
@@ -227,27 +241,123 @@ void * hiloLector( void * args_void )
 *Metodo encargado de crear cierta cantidad de hilos Lectores,
 *segun la cantidad de archivos html ingresados.
 */
-//void CrearLectores( long cantidad )
-//{
-//    long hilo;
-//    pthread_t * lector;
-//
-//    lector = (pthread_t *) calloc( cantidad, sizeof( pthread_t ) );
-//
-//    for ( hilo = 0; hilo < cantidad; hilo++ )
-//    {
-//        pthread_create( & lector[ hilo ], NULL, hiloLector, (void *) hilo );
-//    }
-//
-//
-//    for ( hilo = 0; hilo < cantidad; hilo++ )
-//    {
-//        pthread_join( lector[ hilo ], NULL );
-//    }
-//
-//    free( lector );
-//
-//}
+void * CrearLectores( long cantidad, struct Data_Lector read, std::map<std::string, int> recolecta)
+{
+    long hilo;
+    pthread_t * lector;
+    void * out;
+    struct Result * resultado;
+    std::map<std::string, int> actualizar;
+    std::map<std::string, int>:: iterator it;
+    std::string key;
+
+    lector = (pthread_t *) calloc( cantidad, sizeof( pthread_t ) );
+
+    for ( hilo = 0; hilo < cantidad; hilo++ )
+    {
+        read.identificacion = (int) hilo;
+        printf("Crea Lector %li. \n", hilo);
+        pthread_create( & lector[ hilo ], NULL, hiloLector, &read );
+    }
+
+
+    for ( hilo = 0; hilo < cantidad; hilo++ )
+    {
+        pthread_join( lector[ hilo ], &out );
+        printf("Lector %li finaliza.\n", hilo);
+        resultado = (struct Result*) out;
+        actualizar = resultado->actualizado;
+
+        //Metodo de actualizacion del mapa de etiquetas del lector
+        it = recolecta.begin();
+        while(it != recolecta.end())
+        {
+            key = it->first;
+            recolecta[key] = recolecta[key] + actualizar[key];
+            it++;
+        }
+    }
+
+    free( lector );
+    resultado->actualizado = recolecta;
+    return resultado;
+}
+
+
+/*
+*Metodo encargado de realizar las tareas del HiloMaster.
+*Distribuye los datos necesitados por los Lectores.
+*/
+void * hiloMaster( void * args_void )
+{
+    FileReader * file;
+    file = new FileReader();
+
+    std::map<std::string, int> recolecta;
+    void * out;
+    int cantidad; //Almacena la cantidad de archivos HTML ingresados
+
+    struct Data_Master * maestro = (struct Data_Master*) args_void;
+    struct Data_Lector datos;
+    struct Result * resultado = (struct Result*) calloc(1, sizeof *resultado);
+
+
+    if ( maestro->cant_arg < 4 )
+    {
+        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
+        exit( 1 );
+    }
+
+
+    cantidad = (maestro->cant_arg)-3; //Cantidad de archivos ingresados.
+    datos.trabajadores = atoi(maestro->argumentos[ 1 ]);
+
+    archivos.resize(cantidad);
+    positions.resize(cantidad);
+    semaforo.resize(cantidad);
+    estrategias.resize(cantidad, 0);
+
+
+    //Se agregan los archivos ingresados por el usuario.
+    int posicion = 0;
+    for(int i = 3; i < maestro->cant_arg; i++)
+    {
+        std::string filename = maestro->argumentos[ i ];
+        archivos.at(posicion) = filename;
+        posicion++;
+    }
+
+
+    //Toma las estrategias y las agrega al vector.
+    std::string num (maestro->argumentos[ 2 ]);
+    int strategy = 0;
+
+    //Se divide el string de las estrategias
+    std::istringstream split(num);
+    std::vector <std::string> digitos;
+    std::string cambio;
+    for(std::string each; std::getline(split, each, ','); digitos.push_back(each));
+
+    //Se agregan las estrategias al vector.
+    posicion = 0;
+    for (int i = 0; i < digitos.size(); i++)
+    {
+        cambio = digitos[i];
+        strategy = std::stoi(cambio);
+        estrategias.at(posicion) = strategy;
+        posicion++;
+    }
+
+    recolecta = file->inicializar(recolecta);
+    out = CrearLectores((long)cantidad, datos, recolecta);
+
+    resultado = (struct Result *) out;
+    recolecta = resultado->actualizado;
+    file->setMap(recolecta);
+
+    printf("Hilo Master acumula los resultados.\n");
+    return resultado;
+}
 
 
 /*
@@ -259,7 +369,7 @@ void imprimir(std::map<std::string, int> etiquetas)
     std::map<std::string, int>:: iterator it = etiquetas.begin();
     char key[it->first.size() + 1];
 
-    printf( "Lectura del archivo completada.\n" );
+    printf( "Lectura completada.\n" );
     while(it != etiquetas.end())
     {
 
@@ -281,23 +391,31 @@ void imprimir(std::map<std::string, int> etiquetas)
 int main(int argc, char ** argv)
 {
 
-    pthread_t * lector;
-    struct Data_Lector lect;
+    pthread_t * master;
+    //pthread_t * lector;
+    //struct Data_Lector lect;
+    struct Data_Master maestro;
     void * out;
     struct Result * resultado;
 
-    std::string filename = argv[1];
-    archivos.push_back(filename);
+    //std::string filename = argv[1];
+    //archivos.push_back(filename);
 
+    maestro.cant_arg = argc;
+    maestro.argumentos = argv;
+    //lect.identificacion = 0;
+    //lect.argc = argc;
+    //lect.argv = argv;
 
-    lect.identificacion = 0;
+    //Se crea el hilo maestro, encargado de crear a los Lectores.
+    master = (pthread_t *) calloc( 1, sizeof( pthread_t ) );
+    pthread_create( & master[ 0 ], NULL, hiloMaster, &maestro );
+    printf("Crea hilo master.\n");
+    pthread_join( master[ 0 ], &out );
 
-    lect.argc = argc;
-    lect.argv = argv;
-
-    lector = (pthread_t *) calloc( 1, sizeof( pthread_t ) );
-    pthread_create( & lector[ 0 ], NULL, hiloLector, &lect );
-    pthread_join( lector[ 0 ], &out );
+    //lector = (pthread_t *) calloc( 1, sizeof( pthread_t ) );
+    //pthread_create( & lector[ 0 ], NULL, hiloLector, &lect );
+    //pthread_join( lector[ 0 ], &out );
 
     resultado = (struct Result*) out;
     imprimir(resultado->actualizado);
