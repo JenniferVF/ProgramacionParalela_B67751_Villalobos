@@ -12,7 +12,7 @@
 	"FileReader.h"
 	"Mutex.h"
 
-1591840389 source:/home/jennifer/Documentos/C++/FileReader/FileReader.cpp
+1592017272 source:/home/jennifer/Documentos/C++/FileReader/FileReader.cpp
 	"FileReader.h"
 	<map>
 	<stdio.h>
@@ -22,7 +22,7 @@
 	<iostream>
 	<fstream>
 
-1591840300 /home/jennifer/Documentos/C++/FileReader/FileReader.h
+1592014723 /home/jennifer/Documentos/C++/FileReader/FileReader.h
 	<map>
 	<string>
 	<stdio.h>

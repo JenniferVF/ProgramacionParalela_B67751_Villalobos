@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "FileReader.h"
+#include <ctime>
 #include "Mutex.h"
 
 using namespace std;
@@ -304,7 +305,7 @@ void * hiloMaster( void * args_void )
 
     if ( maestro->cant_arg < 4 )
     {
-        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
+        printf( "Por favor ingrese: <cantidad de trabajadores> <estrategia(s) a utilizar (pegadas)> <archivo(s) a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n 3 - Leer lineas por bloques. \n" );
         exit( 1 );
     }
 
@@ -364,7 +365,7 @@ void * hiloMaster( void * args_void )
 *Metodo encargado de imprimir en consola las etiquetas
 *encontradas en el archivo. Asi como sus contadores.
 */
-void imprimir(std::map<std::string, int> etiquetas)
+void imprimir(std::map<std::string, int> etiquetas, double time)
 {
     std::map<std::string, int>:: iterator it = etiquetas.begin();
     char key[it->first.size() + 1];
@@ -381,6 +382,8 @@ void imprimir(std::map<std::string, int> etiquetas)
         }
         it++;
     }
+
+    printf( "Tiempo transcurrido: %f.\n", time );
 }
 
 
@@ -392,20 +395,17 @@ int main(int argc, char ** argv)
 {
 
     pthread_t * master;
-    //pthread_t * lector;
-    //struct Data_Lector lect;
     struct Data_Master maestro;
     void * out;
     struct Result * resultado;
 
-    //std::string filename = argv[1];
-    //archivos.push_back(filename);
+    clock_t start, finish; //Variables para medir el tiempo.
+    double time = 0; //Resultado del tiempo transcurrido
 
+    start = clock();
     maestro.cant_arg = argc;
     maestro.argumentos = argv;
-    //lect.identificacion = 0;
-    //lect.argc = argc;
-    //lect.argv = argv;
+
 
     //Se crea el hilo maestro, encargado de crear a los Lectores.
     master = (pthread_t *) calloc( 1, sizeof( pthread_t ) );
@@ -413,12 +413,11 @@ int main(int argc, char ** argv)
     printf("Crea hilo master.\n");
     pthread_join( master[ 0 ], &out );
 
-    //lector = (pthread_t *) calloc( 1, sizeof( pthread_t ) );
-    //pthread_create( & lector[ 0 ], NULL, hiloLector, &lect );
-    //pthread_join( lector[ 0 ], &out );
-
     resultado = (struct Result*) out;
-    imprimir(resultado->actualizado);
+
+    finish = clock();
+    time = finish-start;
+    imprimir(resultado->actualizado, time);
 
 }
 

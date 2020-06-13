@@ -25,16 +25,6 @@ FileReader::~FileReader()
     fclose( this->fileId );
 }
 
-//bool FileReader::hasNext(int trabajador)
-//{
-//
-//}
-//
-//int FileReader::getNext(char ** line, int trabajador)
-//{
-//
-//}
-
 
 /*
 *Metodo encargado de inicializar los datos necesitados por el Lector.
@@ -43,13 +33,6 @@ void FileReader::Read(int trabajadores, int estrategia, std::string archivo)
 {
     fpos_t inicio;
     this->etiquetas = inicializar(this->etiquetas);
-
-
-//    if ( argc < 4 )
-//    {
-//        printf( "Por favor ingrese: <el archivo a utilizar>, <cantidad de trabajadores>, <estrategia a utilizar>.\n Estrategias: \n 0 - Un solo trabajador realiza la tarea.\n 1 - Total de lineas/cantidad de trabajadores. \n 2 - Grupos no contiguos de lineas. \n 3 - Entregar las lineas por demanda. \n" );
-//        exit( 1 );
-//    }
 
 
     this->filename = archivo;
@@ -81,7 +64,7 @@ void FileReader::Read(int trabajadores, int estrategia, std::string archivo)
     }
 
     this->totalLines = countLines(this->fileId);
-    printf("Total lines: %d\n", this->totalLines);
+    //printf("Total lines: %d\n", this->totalLines);
 
 
     //Si el total de lineas es divisible entre la cantidad de trabajadores.
@@ -428,30 +411,6 @@ std::map<std::string, int> FileReader::Four(FILE * archivo, std::map<std::string
     return etiquetas;
 }
 
-
-
-/*
-*Metodo encargado de imprimir en consola las etiquetas
-*encontradas en el archivo. Asi como sus contadores.
-*/
-void FileReader::imprimir(std::map<std::string, int> etiquetas)
-{
-    std::map<std::string, int>:: iterator it = etiquetas.begin();
-    char key[it->first.size() + 1];
-
-    printf( "Lectura del archivo completada.\n" );
-    while(it != etiquetas.end())
-    {
-
-        //Si el contador de la etiqueta es mayor a cero, es decir, aparecio al menos una vez, se imprime
-        if(etiquetas[it->first] > 0)
-        {
-            strcpy(key, it->first.c_str());
-            printf("Etiqueta: %s. Cantidad de veces encontrada: %d.\n", key, etiquetas[key]);
-        }
-        it++;
-    }
-}
 
 /*
 *Metodo encargado de inicializar y retornar el mapa con las etiquetas

@@ -26,7 +26,6 @@ class FileReader{
     std::map<std::string, int> Estrategias(FILE *, std::map<std::string, int>, int, int, int, std::string, fpos_t, int);
 
     std::map<std::string, int> comparar(char * , std::map<std::string, int>);
-    void imprimir(std::map<std::string, int>);
     std::map<std::string, int> inicializar(std::map<std::string, int>);
 
     int getStrategy();
