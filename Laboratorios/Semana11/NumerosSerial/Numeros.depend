@@ -15,9 +15,9 @@
 	<string.h>
 	<iostream>
 
-1591377073 source:/home/jennifer/Documentos/C++/NumerosSerial/main.cpp
+1593211477 source:/home/jennifer/Documentos/C++/NumerosSerial/main.cpp
 	<iostream>
-	<ctime>
+	<chrono>
 	"Numeros.h"
 
 1591376549 /home/jennifer/Documentos/C++/NumerosSerial/Numeros.h
@@ -25,7 +25,7 @@
 	<string.h>
 	<iostream>
 
-1593067833 source:/home/jennifer/Documentos/C++/NumerosSerial/Numeros.cpp
+1593109862 source:/home/jennifer/Documentos/C++/NumerosSerial/Numeros.cpp
 	"Numeros.h"
 	<vector>
 	<string.h>

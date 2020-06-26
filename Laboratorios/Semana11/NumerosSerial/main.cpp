@@ -1,7 +1,6 @@
 #include <iostream>
-#include <ctime>
+#include <chrono>
 #include "Numeros.h"
-#include "chrono.h"
 
 using namespace std;
 
@@ -12,10 +11,9 @@ int main(int  argc, char *argv[])
 {
     Numeros * number;
     number = new Numeros();
+    double tiempo;
 
-    Chrono inicio, fin;
-
-    inicio.readTime();
+    auto start = chrono::high_resolution_clock::now();
 
 
     //Se le pide al usuario que ingrese un numero (el limite).
@@ -27,8 +25,8 @@ int main(int  argc, char *argv[])
 
     number->Pares(atoi(argv[1]));
 
-    fin.readTime();
+    auto finish = chrono::high_resolution_clock::now();
 
-    fin -= inicio;
-    printf("Tiempo transcurrido en segundos: %d. \n", fin.getnSecs());
+    tiempo = chrono::duration<double, milli>(finish-start).count();
+    printf("Tiempo transcurrido en milisegundos: %f. \n", tiempo);
 }

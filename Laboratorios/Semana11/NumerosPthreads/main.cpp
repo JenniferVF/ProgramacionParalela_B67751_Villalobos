@@ -1,10 +1,9 @@
 #include <iostream>
-#include <ctime>
+#include <chrono>
 #include <pthread.h>
 #include <math.h>
 #include "Numeros.h"
 #include "Mutex.h"
-#include "Chrono.h"
 
 using namespace std;
 
@@ -87,13 +86,13 @@ void Crear( long cantidad )
 
 int main(int  argc, char *argv[])
 {
-    Chrono inicio, fin;
     int limite = 0;
     int cant_hilos = 0;
     int rango = 0;
     std::vector<int> actual;
+    double tiempo;
 
-    inicio.readTime();
+    auto start = chrono::high_resolution_clock::now();
 
     //Se le pide al usuario que ingrese un numero (el limite).
     if (argc != 3)
@@ -121,8 +120,8 @@ int main(int  argc, char *argv[])
         printf( "%d = %d + %d. \n",actual[0], actual[1], actual[2]);
     }
 
-   fin.readTime();
+    auto finish = chrono::high_resolution_clock::now();
 
-   fin -= inicio;
-   printf("Tiempo transcurrido en segundos: %d. \n", fin.getnSecs());
+    tiempo = chrono::duration<double, milli>(finish-start).count();
+    printf("Tiempo transcurrido en milisegundos: %f. \n", tiempo);
 }

@@ -35,8 +35,6 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="Chrono.cpp" />
-		<Unit filename="Chrono.h" />
 		<Unit filename="Mutex.cpp" />
 		<Unit filename="Mutex.h" />
 		<Unit filename="Numeros.cpp" />

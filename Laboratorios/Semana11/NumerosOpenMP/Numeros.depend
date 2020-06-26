@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1593133311 source:/home/jennifer/Documentos/C++/NumerosOpenMP/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1593133311 /home/jennifer/Documentos/C++/NumerosOpenMP/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
