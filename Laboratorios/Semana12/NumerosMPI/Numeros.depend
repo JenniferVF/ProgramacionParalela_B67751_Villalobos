@@ -1,0 +1,32 @@
+# depslib dependency file v1.0
+1593536198 source:/home/jennifer/Documentos/C++/NumerosMPI/Numeros/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1593536198 /home/jennifer/Documentos/C++/NumerosMPI/Numeros/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1593758678 source:/home/jennifer/Documentos/C++/NumerosMPI/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1593536198 /home/jennifer/Documentos/C++/NumerosMPI/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1593758524 source:/home/jennifer/Documentos/C++/NumerosMPI/main.cpp
+	<iostream>
+	<math.h>
+	<vector>
+	<mpi.h>
+	<time.h>
+	<chrono>
+	"Numeros.h"
+
