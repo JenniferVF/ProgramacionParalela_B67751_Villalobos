@@ -15,8 +15,8 @@ int main(int  argc, char *argv[])
 
     vector<vector<int>> total; //Vector que almacena todas las sumas de todos los numeros.
     int limite = 0; //Almacena el limite ingresado por el usuario
-    int procesos = 0;
-    int cant_procs = 0;
+    int procesos = 0; //Cantidad total de procesos
+    int cant_procs = 0; //Cantidad de procesos con los que se realiza la tarea
     int rango = 0;
     int range = 0;  //Almacena el rango de cada hilo
     int inicio_local = 0;  //Inicio del rango de cada hilo
@@ -44,7 +44,7 @@ int main(int  argc, char *argv[])
     }
 
     limite = atoi(argv[1]);
-    cant_procs = procesos-1;
+    cant_procs = procesos-1; //Se le resta uno (el proceso 0), ya que este no hace los calculos
 
     //En caso de que la cantidad de numeros no sea divisible entre la cantidad de hilos.
     rango = floor(limite/cant_procs);
@@ -67,14 +67,14 @@ int main(int  argc, char *argv[])
             fin_local = limite;
         }
 
-        local = num->Pares(inicio_local, fin_local);
-        veces = local.size();
+        local = num->Pares(inicio_local, fin_local); //Se realiza el calculo
+        veces = local.size(); //Cantidad de numeros calculados
 
-        MPI_Send(&veces, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&veces, 1, MPI_INT, 0, 0, MPI_COMM_WORLD); //Envia al proceso 0 las veces que debe esperar recibir un mensaje
         for(size_t i = 0; i < local.size(); i++)
         {
             actual = local[i];
-            MPI_Send(&actual[0], 3, MPI_INT, 0, 0, MPI_COMM_WORLD);
+            MPI_Send(&actual[0], 3, MPI_INT, 0, 0, MPI_COMM_WORLD); //Envia al proceso 0 la suma de un numero
         }
     }
     else
@@ -84,12 +84,13 @@ int main(int  argc, char *argv[])
 
         for(int proc = 1; proc < procesos; proc++)
         {
+            //Recibe las veces que debe esperar para recibir un mensaje
             MPI_Recv(&veces, 1, MPI_INT, proc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for(int i = 0; i < veces; i++)
             {
                 actual.resize(3); //Crea espacio para 3 ints.
-                MPI_Recv(&actual[0], 3, MPI_INT, proc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                total.push_back(actual);
+                MPI_Recv(&actual[0], 3, MPI_INT, proc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); //Recibe la suma de un numero
+                total.push_back(actual); //Agrega ese resultado al vector global
 
             }
         }
