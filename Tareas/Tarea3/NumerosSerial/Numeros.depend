@@ -1,0 +1,40 @@
+# depslib dependency file v1.0
+1591375121 source:/home/jennifer/Documentos/C++/Numeros/main.cpp
+	<iostream>
+	<ctime>
+	"Numeros.h"
+
+1591376730 source:/home/jennifer/Documentos/C++/Numeros/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1591376549 /home/jennifer/Documentos/C++/Numeros/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1593211477 source:/home/jennifer/Documentos/C++/NumerosSerial/main.cpp
+	<iostream>
+	<chrono>
+	"Numeros.h"
+
+1594100990 /home/jennifer/Documentos/C++/NumerosSerial/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1594098414 source:/home/jennifer/Documentos/C++/NumerosSerial/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1593054310 source:/home/jennifer/Documentos/C++/NumerosSerial/chrono.cpp
+	<time.h>
+	"chrono.h"
+
+1593054163 /home/jennifer/Documentos/C++/NumerosSerial/chrono.h
+	<stdlib.h>
+

@@ -1,0 +1,35 @@
+# depslib dependency file v1.0
+1594101155 source:/home/jennifer/Documentos/C++/NumerosHilos/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1594100233 /home/jennifer/Documentos/C++/NumerosHilos/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1594100243 source:/home/jennifer/Documentos/C++/NumerosHilos/main.cpp
+	<iostream>
+	<chrono>
+	<pthread.h>
+	<math.h>
+	"Numeros.h"
+	"Mutex.h"
+
+1591377627 /home/jennifer/Documentos/C++/NumerosHilos/Mutex.h
+	<pthread.h>
+
+1591377687 source:/home/jennifer/Documentos/C++/NumerosHilos/Mutex.cpp
+	<stdlib.h>
+	<pthread.h>
+	"Mutex.h"
+
+1593070227 source:/home/jennifer/Documentos/C++/NumerosHilos/Chrono.cpp
+	<time.h>
+	"Chrono.h"
+
+1593070217 /home/jennifer/Documentos/C++/NumerosHilos/Chrono.h
+	<stdlib.h>
+
