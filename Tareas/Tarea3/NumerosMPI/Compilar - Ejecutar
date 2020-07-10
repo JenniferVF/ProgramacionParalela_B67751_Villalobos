@@ -1,0 +1,5 @@
+Compilar:
+	mpiCC -g -o num Numeros.cpp main.cpp
+
+Ejecutar:
+	mpiexec -n "cant procesos" ./num "cant terminos" 

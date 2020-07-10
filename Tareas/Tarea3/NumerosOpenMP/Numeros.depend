@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1594329231 source:/home/jennifer/Documentos/C++/NumerosOpenMP/Numeros.cpp
+	"Numeros.h"
+	<vector>
+	<string.h>
+	<iostream>
+
+1594327534 /home/jennifer/Documentos/C++/NumerosOpenMP/Numeros.h
+	<vector>
+	<string.h>
+	<iostream>
+
+1594328773 source:/home/jennifer/Documentos/C++/NumerosOpenMP/main.cpp
+	<iostream>
+	<math.h>
+	<vector>
+	<omp.h>
+	<time.h>
+	<chrono>
+	"Numeros.h"
+
